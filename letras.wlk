@@ -4,9 +4,11 @@ import wollok.game.*
 class LetraFisica {
   var property position
   const property caracter
-  // Cuando la generen, le pasarán la letra. Ej: new LetraFisica(caracter = "A", position = ...)
   
+  // Cuando la generen, le pasarán la letra. Ej: new LetraFisica(caracter = "A", position = ...)
   // --- Visuales ---
+  // TODO: Devolver una imagen dinámica concatenando el caracter (ej: caracter + ".png").
+  // Así, si el caracter es "A", busca "A.png".
   method image() = "letra_placeholder.png"
   
   // --- Interacciones (Polimorfismo CP1) ---
