@@ -1,10 +1,9 @@
 # Wollok Game: Título de juego
 
-**Grupo:** Nombre de Grupo
+**Grupo:** Snack_Overflow
 
 **Integrantes:**
-- Nombre y Apellido
-- Nombre y Apellido
+- Stefano Lucero
 - Nombre y Apellido
 - Nombre y Apellido
 - Nombre y Apellido
@@ -21,10 +20,11 @@ Recuerden que para cada checkpoint hay [expectativas mínimas](https://docs.goog
 - Para la demo final, crear un nuevo tag **demo** y actualizar este README con todo lo necesario.
 
 # Cómo jugar
+El jugador debe esquivar usando a|d para moverse entre railes y cuando aparezcan las letras si es la correcta para responder a la pregunta, hacer que el personaje colisione con la misma repitiendo hasta completar la respuesta
 
 ## Objetivo
 
-TODO
+El jugador debe esquivar las distracciones que tiene su personaje mientras intenta recordar la respuesta a la pregunta que esta en el examen recordando la respuesta letra por letra
 
 ## Controles
 

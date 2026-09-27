@@ -1,0 +1,1 @@
+//Se pondra la pantalla con la pregunta y si hay un sistema de vidas o algo asi

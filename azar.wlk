@@ -1,0 +1,1 @@
+//Codigo para todos los objetos que necesiten el azar en algun lugar
