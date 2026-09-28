@@ -31,5 +31,6 @@ class Obstaculo {
 // --- Movimiento (Temporal CP1) ---
     method bajar() {
         // TODO: Modificar la 'position' para que baje en el eje Y. 
+        // TODO: Si la nueva posición en Y es menor a 0 (salió de la pantalla), remover el objeto con game.remove(self).        
     }
 }
