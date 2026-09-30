@@ -21,13 +21,17 @@ object respuestaActual {
     // 1. Concatenar 'unaLetra' al final de la variable 'palabraArmada'.
     // 2. Remover esa letra de la lista 'letrasFaltantes' (pueden usar letrasFaltantes.remove(unaLetra) o un método similar).
     // Si NO ES IGUAL (se equivocó de letra):
-    // 1. Enviar el mensaje 'estudiante.perderConcentracion(10)'.
+    // 1. Enviar el mensaje 'estudiante.perderConcentracion()'.
   }
+  
+  // Devuelve la siguiente letra obligatoria que necesita el generador
+  method letraEsperada() = letrasFaltantes.first()
   
   // ---------------------------------------------------------
   // --- MÉTODOS PARA EL PRÓXIMO CHECKPOINT (CP2) O FUTURO ---
   // ---------------------------------------------------------
   method estaCompleta() = false
+  //TODO:consulta que debe devolver el estado de letras faltantes
   
   method reiniciar() {
     
