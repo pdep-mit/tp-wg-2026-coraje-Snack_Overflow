@@ -1,0 +1,110 @@
+import estudiante.*
+import carriles.*
+import letras.*
+import distracciones.*
+import ayudas.*
+import wollok.game.* // Necesario porque position() usa game.at()
+
+describe "Pruebas de movimiento y límites de los carriles" {
+  test "Los objetos carril conocen perfectamente a sus vecinos" {
+    // Probamos la lógica matemática pura de los carriles
+    assert.equals(3, carrilIzquierdo.posicionX())
+    assert.equals(carrilCentral, carrilIzquierdo.derecha())
+    
+    // Verificamos que el carril izquierdo hace tope consigo mismo
+    assert.equals(carrilIzquierdo, carrilIzquierdo.izquierda())
+    
+    // Verificamos que el carril derecho hace tope consigo mismo
+    assert.equals(carrilDerecho, carrilDerecho.derecha())
+  }
+  
+  test "El estudiante se mueve correctamente y no traspasa los bordes" {
+    // 1. Verificamos posición inicial (Centro)
+    assert.equals(5, estudiante.position().x())
+    
+    // 2. Nos movemos a la izquierda (Llega a X=3)
+    estudiante.moverIzquierda()
+    assert.equals(3, estudiante.position().x())
+    
+    // 3. Intentamos salirnos del tablero por la izquierda
+    estudiante.moverIzquierda()
+    estudiante.moverIzquierda()
+    assert.equals(3, estudiante.position().x())
+    // Queda trabado en el borde, ¡sin usar IF!
+    // 4. Cruzamos todo el tablero hacia la derecha (Centro -> Derecha)
+    estudiante.moverDerecha() // Vuelve a 5
+    estudiante.moverDerecha() // Llega a 7
+    assert.equals(7, estudiante.position().x())
+    
+    // 5. Intentamos salirnos del tablero por la derecha
+    estudiante.moverDerecha()
+    assert.equals(7, estudiante.position().x())
+  }
+  
+  test "Un obstáculo baja una posición en el eje Y al recibir el mensaje bajar()" {
+    // Lo creamos en la altura 10
+    const celular = new Obstaculo(
+      image = "celular.png",
+      position = game.at(5, 10)
+    )
+    
+    // Simulamos un 'tick' de tiempo
+    celular.bajar()
+    
+    // Verificamos que ahora está en la altura 9
+    assert.equals(9, celular.position().y())
+  }
+  
+  test "Un objeto que cae desaparece del tablero al cruzar el límite inferior" {
+    // Lo creamos a punto de caerse (altura 0)
+    const letra = new LetraFisica(caracter = "A", position = game.at(3, 0))
+    
+    // ¡Clave! Lo agregamos al tablero del test para poder probar que se borra
+    game.addVisual(letra)
+    
+    // Comprobamos que efectivamente está en el tablero
+    assert.that(game.hasVisual(letra))
+    
+    // Lo hacemos bajar (pasaría a Y = -1), lo que debería disparar el game.remove(self)
+    letra.bajar()
+    
+    // Verificamos que ya no existe en el tablero
+    assert.notThat(game.hasVisual(letra))
+  }
+  
+  test "Un objeto temporal (letra o distracción) aparece correctamente en el tablero al agregarlo" {
+    const letra = new LetraFisica(caracter = "A", position = game.at(3, 10))
+    
+    // Simulamos la acción que hará el generador
+    game.addVisual(letra)
+    
+    // Comprobamos que el motor gráfico lo registró
+    assert.that(game.hasVisual(letra))
+  }
+  
+  test "Un obstáculo (clase) se elimina del tablero al cruzar el límite inferior" {
+    // Usamos una clase que sí lleva 'new'
+    const celular = new Obstaculo(
+      image = "celular.png",
+      position = game.at(7, 0)
+    )
+    
+    game.addVisual(celular)
+    
+    // Al bajar, su Y pasa a ser -1, disparando game.remove(self)
+    celular.bajar()
+    
+    assert.notThat(game.hasVisual(celular))
+  }
+  
+  test "Una ayuda única (object) también se elimina de la pantalla al caer" {
+    // Como 'apuntes' es un object, le seteamos la posición directamente sin 'new'
+    apuntes.position(game.at(7, 0))
+    
+    game.addVisual(apuntes)
+    
+    apuntes.bajar()
+    
+    assert.notThat(game.hasVisual(apuntes))
+  }
+}

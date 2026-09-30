@@ -3,7 +3,9 @@
 object respuestaActual {
   var palabraArmada = ""
   var letrasFaltantes = []
+  
   // Se espera una lista de strings, ej: ["O", "B", "J", "E", "T", "O"]
+  method palabraArmada() = palabraArmada
   
   method setearRespuestaEsperada(listaDeLetras) {
     

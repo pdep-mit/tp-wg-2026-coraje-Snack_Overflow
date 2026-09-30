@@ -1,0 +1,55 @@
+import estudiante.*
+import distracciones.*
+import ayudas.*
+import wollok.game.*
+
+describe "Pruebas de polimorfismo e interacciones (CP1)" {
+  test "Un obstáculo genérico le resta 1 de concentración al estudiante al chocar" {
+    // Guardamos la vida inicial (sea 3 o 100, el test funciona igual)
+    const vidaInicial = estudiante.concentracion()
+    
+    
+    // Instanciamos el obstáculo
+    const celular = new Obstaculo(
+      image = "celular.png",
+      position = game.at(5, 5)
+    )
+    
+    // Simulamos la colisión
+    celular.serChocadoPor(estudiante)
+    
+    // Verificamos que se haya restado 1 vida
+    assert.equals(vidaInicial - 1, estudiante.concentracion())
+  }
+  
+  test "El power-up de café le recupera 1 de concentración al estudiante al chocar" {
+    const vidaAntesDelCafe = estudiante.concentracion()
+    
+    // Simulamos que el estudiante agarra el objeto café
+    cafe.serChocadoPor(estudiante)
+    
+    // Verificamos que se haya sumado 1 vida
+    assert.equals(vidaAntesDelCafe + 1, estudiante.concentracion())
+  }
+  
+  test "Polimorfismo en colecciones: El estudiante choca contra varios elementos distintos" {
+    // Esta es la prueba de fuego para los profesores: una lista con distintos tipos de objetos
+    const compuLenta = new Obstaculo(
+      image = "compu.png",
+      position = game.at(3, 3)
+    )
+    
+    
+    // La lista mezcla una instancia de clase (compuLenta) y un objeto (cafe)
+    const elementosQueChocan = [compuLenta, cafe]
+    const vidaInicial = estudiante.concentracion()
+    
+    // Le mandamos el MISMO mensaje a todos los elementos sin importar qué son
+    elementosQueChocan.forEach(
+      { elemento => elemento.serChocadoPor(estudiante) }
+    )
+    
+    // Como la compu resta 1 y el café suma 1, la vida debería volver a quedar exactamente igual que al inicio
+    assert.equals(vidaInicial, estudiante.concentracion())
+  }
+}

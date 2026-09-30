@@ -1,0 +1,51 @@
+import estudiante.*
+import letras.*
+import respuestas.* // ¡Cambiar por tu nombre actual!
+import wollok.game.*
+
+describe "Pruebas de colisión con Letras Físicas" {
+  method initialize() {
+    // Configuramos una respuesta de prueba antes de cada test
+    respuestaActual.setearRespuestaEsperada(["U", "T", "N"])
+  }
+  
+  test "Chocar con la letra física CORRECTA la delega a la respuesta y no resta vida" {
+    const vidaInicial = estudiante.concentracion()
+    
+    
+    // Instanciamos la letra correcta ("U") en una posición cualquiera
+    const letraCorrecta = new LetraFisica(
+      caracter = "U",
+      position = game.at(5, 5)
+    )
+    
+    // Simulamos la colisión
+    letraCorrecta.serChocadoPor(estudiante)
+    
+    // Verificamos que la letra física le avisó correctamente a 'respuestaActual'
+    assert.equals("U", respuestaActual.palabraArmada())
+    
+    // Verificamos que el estudiante sigue intacto
+    assert.equals(vidaInicial, estudiante.concentracion())
+  }
+  
+  test "Chocar con la letra física INCORRECTA delega el error y resta vida" {
+    const vidaInicial = estudiante.concentracion()
+    
+    
+    // Instanciamos una letra incorrecta ("X")
+    const letraIncorrecta = new LetraFisica(
+      caracter = "X",
+      position = game.at(5, 5)
+    )
+    
+    // Simulamos la colisión
+    letraIncorrecta.serChocadoPor(estudiante)
+    
+    // Verificamos que la palabra sigue vacía (se rechazó)
+    assert.equals("", respuestaActual.palabraArmada())
+    
+    // Verificamos que la penalización llegó al estudiante
+    assert.equals(vidaInicial - 1, estudiante.concentracion())
+  }
+}
