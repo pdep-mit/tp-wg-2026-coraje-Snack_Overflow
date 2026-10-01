@@ -4,8 +4,8 @@ import wollok.game.*
 
 //A futuro puede que haya que crear mas ayudas pero estas estan bien por ahora
 object cafe {
-  var property position
-  //hay que poner desde donde salgta cuando definamos el limite del mapa
+  var property position = game.at(0, 0) // <--- Valor inicial para que no se queje Wollok
+  
   
   method image() = "cafe.png"
   
@@ -24,7 +24,7 @@ object cafe {
 }
 
 object apuntes {
-  var property position
+  var property position = game.at(0, 0) // <--- Valor inicial para que no se queje Wollok esto despues se sobreescribe cuando se llama al generador
   
   method image() = "apuntes.png"
   
