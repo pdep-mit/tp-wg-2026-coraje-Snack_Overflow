@@ -15,12 +15,10 @@ program MinijuegoEstudiante {
 	// 3. Le pasamos únicamente la lista de letras a la respuesta actual
 	respuestaActual.setearRespuestaEsperada(preguntaActual.letras())
 	
-	// (Opcional guardado): Si querés guardar la pregunta en algún lado para cuando armen el HUD, 
-	// podés dejarla accesible, pero para arrancar el juego solo te interesan sus letras.
 	// 4. Arrancamos los generadores con el abecedario o letras disponibles
 	generadorDeLetras.iniciar()
 	generadorDeObstaculos.iniciar()
 	generadorDeAyudas.iniciar()
-	
+
 	game.start()
 }
