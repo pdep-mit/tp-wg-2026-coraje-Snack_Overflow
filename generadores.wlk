@@ -9,26 +9,47 @@ import ayudas.*
 import wollok.game.*
 
 object generadorDeLetras {
-  method iniciar(letrasDisponibles) {
+  // El abecedario vive acá adentro y no molesta en el programa principal
+  const letrasDisponibles = [
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z"
+  ]
+  
+  method iniciar() {
     game.onTick(
       20000,
       "generarLetrasSimultaneas",
       { 
-        // 1. Obtenemos los carriles disponibles
         const carriles = [carrilIzquierdo, carrilCentral, carrilDerecho]
-        
-        
-        // 2. Elegimos un carril al azar exclusivamente para la letra correcta
         const carrilParaCorrecta = carriles.anyOne()
-        
-        
-        
-        // 3. Le pedimos a la respuesta actual cuál es la letra que corresponde ahora
-        // (Asegurate de que el método en respuestas.wlk se llame acorde, ej: letraEsperada() o similar)
         const caracterCorrecto = respuestaActual.letraEsperada()
         
         
-        // Creamos y agregamos la letra correcta
+        // Colocamos la letra correcta
         const letraCorrectaFisica = new LetraFisica(
           caracter = caracterCorrecto,
           position = game.at(carrilParaCorrecta.posicionX(), 10)
@@ -36,12 +57,11 @@ object generadorDeLetras {
         game.addVisual(letraCorrectaFisica)
         
         
-        // 4. Filtramos los carriles que sobraron (los otros dos)
+        // Colocamos las letras señuelos al azar en los carriles restantes
         const carrilesRestantes = carriles.filter(
           { carril => carril != carrilParaCorrecta }
         )
-        return // 5. En los carriles restantes tiramos letras totalmente al azar de la lista
-        carrilesRestantes.forEach(
+        return carrilesRestantes.forEach(
           { carril =>
             const letraAleatoria = azar.elementoDe(letrasDisponibles)
             const letraAleatoriaFisica = new LetraFisica(
@@ -69,6 +89,7 @@ object generadorDeObstaculos {
       esperaAleatoria,
       { 
         const carrilElegido = azar.carrilAleatorio()
+        
         
         // Elegimos una imagen aleatoria de la lista de distracciones disponibles,hay que agregar a los .png
         const imagenAleatoria = azar.elementoDe(
@@ -101,8 +122,10 @@ object generadorDeAyudas {
         const carrilElegido = azar.carrilAleatorio()
         
         
+        
         // Elegimos un objeto de ayuda al azar de la lista
         const ayudaElegida = azar.elementoDe(ayudasDisponibles)
+        
         
         
         // Si el objeto elegido no está actualmente en pantalla, lo posicionamos y lo agregamos
