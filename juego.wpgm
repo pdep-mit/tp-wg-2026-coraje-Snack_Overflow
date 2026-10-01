@@ -9,7 +9,6 @@ program MinijuegoEstudiante {
 	//Se agrega todas las config
 	gameConfig.configurarTodo()
 	
-	
 	// 2. Pedimos una pregunta aleatoria al nuevo objeto
 	const preguntaActual = bancoDePreguntas.preguntaAleatoria()
 	
@@ -22,5 +21,6 @@ program MinijuegoEstudiante {
 	generadorDeLetras.iniciar()
 	generadorDeObstaculos.iniciar()
 	generadorDeAyudas.iniciar()
+	
 	game.start()
 }
