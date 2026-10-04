@@ -4,8 +4,8 @@
 
 **Integrantes:**
 - Stefano Lucero
-- Nombre y Apellido
-- Nombre y Apellido
+- Candela Fava
+- Joaquin Silva 
 - Nombre y Apellido
 
 ## Consignas
