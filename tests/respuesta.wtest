@@ -21,7 +21,7 @@ describe "Pruebas del sistema de respuestas y validación de letras" {
     assert.equals(vidaInicial, estudiante.concentracion())
   }
   
-  test "Agarrar una letra incorrecta rechaza la letra y le resta vida al estudiante" {
+  test "Agarrar una letra incorrecta la rechaza sin restar vida" {
     const vidaInicial = estudiante.concentracion()
     
     // La primera letra esperada es "P", pero el jugador agarra una "X"
@@ -30,11 +30,12 @@ describe "Pruebas del sistema de respuestas y validación de letras" {
     // La palabra armada debe seguir vacía porque se rechazó el ingreso
     assert.equals("", respuestaActual.palabraArmada())
     
-    // El estudiante debió perder 1 de concentración
-    assert.equals(vidaInicial - 1, estudiante.concentracion())
+    // Una letra equivocada no penaliza; una respuesta escrita equivocada sí.
+    assert.equals(vidaInicial, estudiante.concentracion())
   }
   
-  test "Completar toda la palabra activa la condición de victoria/completado" {
+  test "Completar toda la palabra responde automaticamente sin puntos" {
+    const puntosIniciales = respuestaActual.puntos()
     // Simulamos que el jugador agarra todas las letras bien y en orden
     respuestaActual.agregarLetra("P")
     respuestaActual.agregarLetra("D")
@@ -46,5 +47,8 @@ describe "Pruebas del sistema de respuestas y validación de letras" {
     
     // Verificamos que el estado de la respuesta ahora es completo (para el CP2)
     assert.that(respuestaActual.estaCompleta())
+    assert.that(respuestaActual.estaRespondida())
+    assert.notThat(respuestaActual.fuePremiada())
+    assert.equals(puntosIniciales, respuestaActual.puntos())
   }
 }

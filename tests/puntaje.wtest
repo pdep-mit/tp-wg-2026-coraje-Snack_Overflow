@@ -1,0 +1,193 @@
+import respuestas.*
+import gameConfiguration.*
+import todasLasPreguntas.*
+
+class AlumnoParaPuntaje {
+  var vidas = 5
+  method concentracion() = vidas
+  method perderConcentracion() { vidas -= 1 }
+}
+
+class PistaParaPuntaje {
+  var opciones = []
+  method avanzar(milisegundos) {}
+  method limpiarObstaculos() {}
+  method mostrarOpciones(letras) { opciones = letras.copy() }
+  method retirarOpciones() { opciones = [] }
+  method opciones() = opciones.copy()
+}
+
+object tiemposParaPuntaje {
+  method intervaloDeActualizacion() = 100
+  method duracionRecorrido() = 100
+  method duracionZonaSegura() = 500
+  method puntosPorLetra() = ajustesDelJuego.puntosPorLetra()
+  method abecedario() = ajustesDelJuego.abecedario()
+}
+
+describe "Puntaje escrito y resolucion automatica por letras" {
+  const alumno = new AlumnoParaPuntaje()
+  const respuesta = new Respuesta(receptorDeErrores = alumno)
+
+  test "Una respuesta escrita de tres letras da 300 puntos" {
+    respuesta.setearRespuestaEsperada(["U", "T", "N"])
+    assert.that(respuesta.responder(" utn "))
+    assert.equals(300, respuesta.puntos())
+    assert.that(respuesta.estaRespondida())
+    assert.that(respuesta.estaCompleta())
+    assert.that(respuesta.fuePremiada())
+    assert.equals("Respuesta correcta! +300 puntos", respuesta.mensaje())
+  }
+
+  test "Cada aparicion de una letra repetida cuenta para el premio" {
+    respuesta.setearRespuestaEsperada(["H", "A", "S", "K", "E", "L", "L"])
+    respuesta.responder("HASKELL")
+    assert.equals(700, respuesta.puntos())
+  }
+
+  test "Responder con pistas parciales premia la longitud de toda la palabra" {
+    respuesta.setearRespuestaEsperada(["P", "D", "E", "P"])
+    respuesta.agregarLetra("P")
+    respuesta.agregarLetra("D")
+    assert.equals(0, respuesta.puntos())
+    respuesta.responder("PDEP")
+    assert.equals(400, respuesta.puntos())
+  }
+
+  test "Una respuesta escrita incorrecta no da puntos ni cierra la pregunta" {
+    respuesta.setearRespuestaEsperada(["U", "T", "N"])
+    respuesta.agregarLetra("U")
+    assert.notThat(respuesta.responder("UBA"))
+    assert.equals(0, respuesta.puntos())
+    assert.notThat(respuesta.estaRespondida())
+    assert.equals("U _ _", respuesta.textoConGuiones())
+    assert.equals(4, alumno.concentracion())
+  }
+
+  test "La ultima letra recogida resuelve automaticamente sin premio" {
+    respuesta.setearRespuestaEsperada(["P", "D", "E", "P"])
+    ["P", "D", "E"].forEach({ letra => respuesta.agregarLetra(letra) })
+    assert.notThat(respuesta.estaRespondida())
+    respuesta.agregarLetra("P")
+    assert.that(respuesta.estaRespondida())
+    assert.that(respuesta.estaCompleta())
+    assert.notThat(respuesta.fuePremiada())
+    assert.equals(0, respuesta.puntos())
+    assert.equals("P D E P", respuesta.textoConGuiones())
+    assert.equals("", respuesta.letraEsperada())
+    assert.equals("Respuesta correcta! Completada en carriles, sin puntos", respuesta.mensaje())
+  }
+
+  test "No se puede cobrar escribiendo una respuesta ya completada en carriles" {
+    respuesta.setearRespuestaEsperada(["U", "T", "N"])
+    ["U", "T", "N"].forEach({ letra => respuesta.agregarLetra(letra) })
+    assert.notThat(respuesta.responder("UTN"))
+    assert.notThat(respuesta.responder("UBA"))
+    assert.notThat(respuesta.agregarLetra("U"))
+    assert.equals(0, respuesta.puntos())
+    assert.equals(5, alumno.concentracion())
+  }
+
+  test "Una respuesta escrita correcta se cobra una sola vez" {
+    respuesta.setearRespuestaEsperada(["U", "T", "N"])
+    respuesta.responder("UTN")
+    assert.notThat(respuesta.responder("UTN"))
+    respuesta.agregarLetra("N")
+    assert.equals(300, respuesta.puntos())
+  }
+
+  test "Completar otra pregunta en carriles conserva los puntos anteriores" {
+    respuesta.setearRespuestaEsperada(["U", "T", "N"])
+    respuesta.responder("UTN")
+    respuesta.setearRespuestaEsperada(["A"])
+    respuesta.agregarLetra("A")
+    assert.equals(300, respuesta.puntos())
+    assert.that(respuesta.estaRespondida())
+    assert.notThat(respuesta.fuePremiada())
+  }
+
+  test "Cargar una pregunta nueva habilita un nuevo premio escrito" {
+    respuesta.setearRespuestaEsperada(["U", "T", "N"])
+    ["U", "T", "N"].forEach({ letra => respuesta.agregarLetra(letra) })
+    respuesta.setearRespuestaEsperada(["P", "D", "E", "P"])
+    assert.notThat(respuesta.estaRespondida())
+    respuesta.responder("PDEP")
+    assert.equals(400, respuesta.puntos())
+  }
+
+  test "El valor configurable se aplica por letra" {
+    assert.equals(100, ajustesDelJuego.puntosPorLetra())
+    respuesta.configurarPuntosPorLetra(25)
+    respuesta.setearRespuestaEsperada(["P", "D", "E", "P"])
+    respuesta.responder("PDEP")
+    assert.equals(100, respuesta.puntos())
+  }
+
+  test "Una lista vacia no equivale a una respuesta correcta" {
+    respuesta.setearRespuestaEsperada([])
+    assert.notThat(respuesta.estaCompleta())
+    assert.notThat(respuesta.estaRespondida())
+    assert.notThat(respuesta.responder(""))
+    assert.notThat(respuesta.agregarLetra("A"))
+    assert.equals(0, respuesta.puntos())
+    assert.equals(5, alumno.concentracion())
+  }
+
+  test "Reiniciar pistas no permite cobrar una pregunta ya respondida" {
+    respuesta.setearRespuestaEsperada(["A"])
+    respuesta.agregarLetra("A")
+    respuesta.reiniciar()
+    assert.that(respuesta.estaRespondida())
+    assert.notThat(respuesta.responder("A"))
+    assert.equals(0, respuesta.puntos())
+  }
+}
+
+describe "La sesion reconoce ambas formas de resolver" {
+  const alumno = new AlumnoParaPuntaje()
+  const respuesta = new Respuesta(receptorDeErrores = alumno)
+  const pista = new PistaParaPuntaje()
+  const sesion = new SesionDeJuego(respuesta = respuesta, jugador = alumno, ajustes = tiemposParaPuntaje)
+
+  method initialize() {
+    sesion.conectarPista(pista)
+    sesion.cargarPregunta(new Pregunta(enunciado = "Universidad", letras = ["U", "T", "N"]))
+  }
+
+  test "Escribir la respuesta correcta cierra la pregunta con 300 puntos" {
+    sesion.presionarEnter()
+    ["U", "T", "N"].forEach({ letra => sesion.escribir(letra) })
+    sesion.presionarEnter()
+    assert.equals("pregunta resuelta", sesion.estado())
+    assert.equals(300, respuesta.puntos())
+    assert.equals([], pista.opciones())
+  }
+
+  test "La ultima eleccion en carriles cierra la pregunta sin confirmar ni sumar" {
+    ["U", "T", "N"].forEach({ letra =>
+      sesion.avanzar()
+      assert.equals("zona segura", sesion.estado())
+      sesion.recogerLetra(letra)
+    })
+    assert.equals("pregunta resuelta", sesion.estado())
+    assert.equals(0, respuesta.puntos())
+    assert.equals([], pista.opciones())
+    sesion.presionarEnter()
+    sesion.escribir("U")
+    sesion.presionarEnter()
+    sesion.avanzar()
+    assert.equals("pregunta resuelta", sesion.estado())
+    assert.equals(0, respuesta.puntos())
+    assert.equals(5, alumno.concentracion())
+  }
+
+  test "Escribir despues de recoger una pista sigue dando 100 por cada letra total" {
+    sesion.avanzar()
+    sesion.recogerLetra("U")
+    sesion.presionarEnter()
+    ["U", "T", "N"].forEach({ letra => sesion.escribir(letra) })
+    sesion.presionarEnter()
+    assert.equals("pregunta resuelta", sesion.estado())
+    assert.equals(300, respuesta.puntos())
+  }
+}
