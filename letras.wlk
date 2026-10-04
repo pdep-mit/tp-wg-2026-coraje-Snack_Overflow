@@ -5,23 +5,28 @@ class LetraFisica {
   var property position
   const property caracter
   
-  // Cuando la generen, le pasarán la letra. Ej: new LetraFisica(caracter = "A", position = ...)
-  // --- Visuales ---
-  // TODO: Devolver una imagen dinámica concatenando el caracter (ej: caracter + ".png").
-  // Así, si el caracter es "A", busca "A.png".
-  method image() = "letra_placeholder.png"
+ // --- Visuales ---
+  // Devuelve la imagen dinámica concatenando el caracter
+  method image() = caracter + ".png"
   
   // --- Interacciones (Polimorfismo CP1) ---
   method serChocadoPor(unEstudiante) {
+    // Le mandamos el mensaje a respuestaActual delegando la validación
+    respuestaActual.agregarLetra(caracter)
     
-    // TODO: Mandarle el mensaje 'agregarLetra(caracter)' al objeto 'respuestaActual'.
-    // TODO: Remover esta letra del tablero usando 'game.remove(self)'.
+    // Removemos esta letra del tablero
+    game.removeVisual(self) 
   }
   
   // --- Movimiento (Temporal CP1) ---
   method bajar() {
+    // Modificamos la position para que baje en el eje Y
+    position = position.down(1)
     
-    // TODO: Modificar la 'position' para que baje en el eje Y.
-    // TODO: Si la nueva posición en Y es menor a 0 (salió de la pantalla), remover el objeto con game.remove(self).
+    // Si salió de la pantalla (Y menor a 0), removemos el objeto
+    if (position.y() < 0) {
+      game.removeVisual(self)
+    }
   }
+}
 }

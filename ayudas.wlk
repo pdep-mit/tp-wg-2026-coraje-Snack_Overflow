@@ -2,40 +2,43 @@
 import estudiante.*
 import wollok.game.*
 
-//A futuro puede que haya que crear mas ayudas pero estas estan bien por ahora
+
 object cafe {
-  var property position = game.at(0, 0) // <--- Valor inicial para que no se queje Wollok
-  
+  var property position = game.at(0, 0) 
   
   method image() = "cafe.png"
   
   // --- Interacciones (Polimorfismo CP1) ---
   method serChocadoPor(unEstudiante) {
-    
-    // TODO: Mandarle el mensaje 'recuperarConcentracion1)' al estudiante.
-    // TODO: Remover esta ayuda del tablero usando 'game.remove(self)'.
+    unEstudiante.recuperarConcentracion()
+    game.removeVisual(self)
   }
   
   // --- Movimiento (Temporal CP1) ---
   method bajar() {
+    position = position.down(1)
     
-    // TODO: Modificar la 'position' para que baje en el eje Y.
+    if (position.y() < 0) {
+      game.removeVisual(self)
+    }
   }
 }
 
 object apuntes {
-  var property position = game.at(0, 0) // <--- Valor inicial para que no se queje Wollok esto despues se sobreescribe cuando se llama al generador
+  var property position = game.at(0, 0) // 
   
   method image() = "apuntes.png"
   
   method serChocadoPor(unEstudiante) {
-    
-    // TODO: Mandarle un mensaje al estudiante para activar su escudo (ej: activarEscudo()).
-    // TODO: Remover esta ayuda del tablero usando 'game.remove(self)'.
+    unEstudiante.activarEscudo()
+    game.removeVisual(self)
   }
   
   method bajar() {
+    position = position.down(1)
     
-    // TODO: Modificar la 'position' para que baje en el eje Y.
+    if (position.y() < 0) {
+      game.removeVisual(self)
+    }
   }
 }
