@@ -8,17 +8,16 @@ import wollok.game.*
 program MinijuegoEstudiante {
 	//Se agrega todas las config
 	gameConfig.configurarTodo()
+	// 1. Obtenemos la pregunta
+    const preguntaElegida = bancoDePreguntas.preguntaAleatoria()
+    
+    // 2. SE LA CARGAMOS AL SISTEMA DEL COMPAÑERO (Esto hace que aparezca el texto)
+    gameConfig.cargarPregunta(preguntaElegida)
 	
-	// 2. Pedimos una pregunta aleatoria al nuevo objeto
-	const preguntaActual = bancoDePreguntas.preguntaAleatoria()
+	gameConfig.conectarPista(pistaDelJuego)
 	
 	// 3. Le pasamos únicamente la lista de letras a la respuesta actual
-	respuestaActual.setearRespuestaEsperada(preguntaActual.letras())
-	
-	// 4. Arrancamos los generadores con el abecedario o letras disponibles
-	generadorDeLetras.iniciar()
-	generadorDeObstaculos.iniciar()
-	generadorDeAyudas.iniciar()
+	respuestaActual.setearRespuestaEsperada(preguntaElegida.letras())
 
 	game.start()
 }

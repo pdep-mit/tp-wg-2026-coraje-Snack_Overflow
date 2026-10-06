@@ -7,7 +7,7 @@ class LetraFisica {
   
  // --- Visuales ---
   // Devuelve la imagen dinámica concatenando el caracter
-  method image() = caracter + ".png"
+  method image() = "letras/" + caracter + ".png"
   
   // --- Interacciones (Polimorfismo CP1) ---
   method serChocadoPor(unEstudiante) {
@@ -22,11 +22,5 @@ class LetraFisica {
   method bajar() {
     // Modificamos la position para que baje en el eje Y
     position = position.down(1)
-    
-    // Si salió de la pantalla (Y menor a 0), removemos el objeto
-    if (position.y() < 0) {
-      game.removeVisual(self)
-    }
   }
-}
 }

@@ -1,12 +1,13 @@
 import estudiante.*
 import respuestas.*
+import gameConfiguration.*
 import wollok.game.*
 
 object preguntaVisual {
   method position() = game.at(1, 11)
 
   // Texto provisional para CP1.
-  method text() = "QUE ES LA CAPACIDAD QUE TIENEN..."
+  method text() = gameConfig.preguntaActual()
 }
 
 object palabraArmadaVisual {

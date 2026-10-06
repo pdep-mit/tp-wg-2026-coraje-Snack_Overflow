@@ -1,6 +1,7 @@
 import estudiante.*
 import respuestas.*
 import hud.*
+import generadores.*
 import wollok.game.*
 
 object ajustesDelJuego {
@@ -9,7 +10,7 @@ object ajustesDelJuego {
   method ancho() = 11
   method alto() = 15
   method tamanioCelda() = 40
-  method intervaloDeActualizacion() = 100
+  method intervaloDeActualizacion() = 200 
   method duracionRecorrido() = 30000
   method duracionZonaSegura() = 5000
   // Premio escrito: este valor multiplicado por la longitud de la respuesta.
@@ -261,6 +262,56 @@ class ModoResuelto inherits ModoDeJuego {
 class ModoSinVidas inherits ModoResuelto {
   override method nombre() = "sin vidas"
   override method corresponde(sesion, tiempo) = sesion.sinVidas()
+}
+
+object pistaDelJuego {
+  const elementosEnPista = []
+  
+  // Contadores de tiempo en milisegundos
+  var tiempoParaProximaLetra = 4000 //Tiempo inicial para probar,al momento de er jugable conviene uno mal alto como 20000
+  var tiempoParaProximoObstaculo = 1000 
+
+  method agregar(elemento) {
+    elementosEnPista.add(elemento)
+    game.addVisual(elemento)
+  }
+
+  method avanzar(milisegundos) {
+    // 1. Mover todos los elementos hacia abajo
+    elementosEnPista.forEach({ elemento => elemento.bajar() })
+    
+    // Limpiar los que se caen del mapa
+    const elementosParaBorrar = elementosEnPista.filter({ e => e.position().y() < 0 })
+    elementosParaBorrar.forEach({ e => 
+        game.removeVisual(e)
+        elementosEnPista.remove(e)
+    })
+
+    // 2. Descontar el tiempo transcurrido (milisegundos viene de tu config global)
+    tiempoParaProximaLetra -= milisegundos
+    tiempoParaProximoObstaculo -= milisegundos
+
+    // 3. Generar Letras
+    if (tiempoParaProximaLetra <= 0) {
+        generadorDeLetras.generar()
+        tiempoParaProximaLetra = 5000 //Tiempo inicial para probar,al momento de ser jugable conviene uno mal alto como 20000
+        
+        // REGLA ANTI-SOLAPAMIENTO: Si tiramos letras, atrasamos los obstáculos
+        tiempoParaProximoObstaculo = tiempoParaProximoObstaculo.max(1500)
+    }
+
+    // 4. Generar Obstáculos
+    if (tiempoParaProximoObstaculo <= 0) {
+        generadorDeObstaculos.generar()
+        // Elegimos un tiempo aleatorio para el siguiente (ej: entre 0,5 y 1,5 segundos)
+        tiempoParaProximoObstaculo = [500, 750, 1000, 1500].anyOne() 
+    }
+  }
+
+  // Interfaz requerida
+  method limpiarObstaculos() {}
+  method mostrarOpciones(letras) {}
+  method retirarOpciones() {}
 }
 
 // Adaptador vacío hasta que el equipo conecte generadores y movimiento.

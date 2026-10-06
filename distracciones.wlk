@@ -13,10 +13,6 @@ class Obstaculo {
 
     // --- Movimiento (Temporal CP1) ---
     method bajar() {
-        position = position.down(1)
-        
-        if (position.y() < 0) {
-            game.removeVisual(self)
-        }        
+        position = position.down(1)    
     }
 }
