@@ -68,7 +68,7 @@ class Respuesta {
   // Completar las pistas resuelve la pregunta, pero no otorga puntos.
   method registrarRespuestaPorLetras() {
     self.marcarRespondida()
-    mensaje = "Respuesta correcta! Completada en carriles, sin puntos"
+    mensaje = "Respuesta correcta!" // Completada en carriles, sin puntos"
   }
 
   // Solo el acierto escrito premia; cuenta todas las letras, incluso las repetidas.
@@ -77,12 +77,16 @@ class Respuesta {
     self.marcarRespondida()
     puntos += premio
     premiada = true
-    mensaje = "Respuesta correcta! +" + premio.toString() + " puntos"
+    mensaje = "Respuesta correcta! +"  + premio.toString() + " puntos"
   }
 
   method registrarRespuestaIncorrecta() {
     receptorDeErrores.perderConcentracion()
     mensaje = "Respuesta incorrecta: -1 vida"
+  }
+  method registrarLetraIncorrecta() {
+    receptorDeErrores.perderConcentracion() // Le resta 1 vida al estudiante
+    mensaje = "Letra incorrecta: -1 vida"   // Actualiza el texto en el HUD
   }
 }
 
@@ -99,7 +103,11 @@ object letraAceptada {
 
 object letraIgnorada {
   method corresponde(respuesta, letra) = true
-  method aplicar(respuesta, letra) = false
+ method aplicar(respuesta, letra) {
+    // Le mandamos la orden de restar vida
+    respuesta.registrarLetraIncorrecta() 
+    return false
+  }
 }
 
 object respuestaCompletadaPorLetras {

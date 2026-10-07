@@ -28,6 +28,7 @@ object bancoDePreguntas {
       enunciado = "Lenguaje de objetos con soporte para videojuegos",
       letras = ["W", "O", "L", "L", "O", "K"]
     )
+    
   ]
   
   method preguntaAleatoria() = azar.elementoDe(preguntasDisponibles)

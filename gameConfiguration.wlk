@@ -8,7 +8,7 @@ object ajustesDelJuego {
   method titulo() = "Snack Overflow - Examen a la carrera"
   // Los carriles existentes (3, 5 y 7) quedan centrados en este tablero.
   method ancho() = 11
-  method alto() = 15
+  method alto() = 16
   method tamanioCelda() = 40
   method intervaloDeActualizacion() = 200 
   method duracionRecorrido() = 30000
@@ -268,7 +268,7 @@ object pistaDelJuego {
   const elementosEnPista = []
   
   // Contadores de tiempo en milisegundos
-  var tiempoParaProximaLetra = 4000 //Tiempo inicial para probar,al momento de er jugable conviene uno mal alto como 20000
+  var tiempoParaProximaLetra = 4000 //Tiempo inicial para probar,al momento de ser jugable conviene uno mal alto como 20000
   var tiempoParaProximoObstaculo = 1000 
 
   method agregar(elemento) {
@@ -297,12 +297,14 @@ object pistaDelJuego {
         tiempoParaProximaLetra = 5000 //Tiempo inicial para probar,al momento de ser jugable conviene uno mal alto como 20000
         
         // REGLA ANTI-SOLAPAMIENTO: Si tiramos letras, atrasamos los obstáculos
-        tiempoParaProximoObstaculo = tiempoParaProximoObstaculo.max(1500)
+        tiempoParaProximoObstaculo = tiempoParaProximoObstaculo.max(500)
     }
 
     // 4. Generar Obstáculos
     if (tiempoParaProximoObstaculo <= 0) {
-        generadorDeObstaculos.generar()
+      if (tiempoParaProximaLetra > 500) {
+                generadorDeObstaculos.generar()
+            }
         // Elegimos un tiempo aleatorio para el siguiente (ej: entre 0,5 y 1,5 segundos)
         tiempoParaProximoObstaculo = [500, 750, 1000, 1500].anyOne() 
     }
@@ -323,12 +325,12 @@ object pistaSinConectar {
 }
 
 object panelDeRespuesta {
-  method position() = game.at(ajustesDelJuego.ancho().div(2), 13)
+  method position() = game.at(ajustesDelJuego.ancho().div(2), 12)
   method text() = gameConfig.textoDelPanel()
 }
 
 object resultadoVisual {
-  method position() = game.at(ajustesDelJuego.ancho().div(2), 12)
+  method position() = game.at(3, 11)
   method text() = respuestaActual.mensaje()
 }
 

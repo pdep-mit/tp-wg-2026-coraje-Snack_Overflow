@@ -4,16 +4,16 @@ import gameConfiguration.*
 import wollok.game.*
 
 object preguntaVisual {
-  method position() = game.at(1, 11)
+  method position() = game.at(5, 15)
 
   // Texto provisional para CP1.
   method text() = gameConfig.preguntaActual()
 }
 
 object palabraArmadaVisual {
-  method position() = game.at(2, 10)
-
-  method text() = respuestaActual.palabraArmada()
+  method position() = game.at(5, 13)//hay 2 de distancia respecto a la pregunta por si es muy larga
+  method text() = respuestaActual.textoConGuiones()
+  //method text() = respuestaActual.palabraArmada()
 }
 
 object vidasVisual {
