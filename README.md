@@ -6,7 +6,7 @@
 - Stefano Lucero
 - Candela Fava
 - Joaquin Silva 
-- Nombre y Apellido
+- Nicolas Bidone
 
 ## Consignas
 
@@ -20,15 +20,29 @@ Recuerden que para cada checkpoint hay [expectativas mínimas](https://docs.goog
 - Para la demo final, crear un nuevo tag **demo** y actualizar este README con todo lo necesario.
 
 # Cómo jugar
-El jugador debe esquivar usando a|d para moverse entre railes y cuando aparezcan las letras si es la correcta para responder a la pregunta, hacer que el personaje colisione con la misma repitiendo hasta completar la respuesta
+Durante la partida, caerán letras y distracciones por los distintos carriles de la pantalla. Debes posicionar al personaje para interceptar en orden las letras que forman la palabra buscada.
+
+Si atrapas la letra correcta, la palabra se irá armando en pantalla.
+
+Si chocas contra una distracción (como el celular o redes sociales) o atrapas una letra incorrecta, el estudiante perderá concentración.
+
+Tambien si estas muy seguro puede entrar al modo respuesta y responder directamente la pregunta
 
 ## Objetivo
 
-El jugador debe esquivar las distracciones que tiene su personaje mientras intenta recordar la respuesta a la pregunta que esta en el examen recordando la respuesta letra por letra
+Ayudar al estudiante a superar su bloqueo mental durante un examen. Para ganar, deberás recordar y armar la respuesta correcta al concepto evaluado, recolectando las letras necesarias mientras evitas que las distracciones del entorno consuman toda tu concentración (vidas).
 
 ## Controles
 
-TODO
+- Flecha Izquierda / Derecha (← / →): Mover al personaje entre los carriles.
+
+- Enter: Pausar la caída de objetos y entrar al Modo Escritura para arriesgar la respuesta completa.
+
+- Teclado (A-Z): Tipear la palabra mientras estás en el Modo Escritura.
+
+- Retroceso (Backspace): Borrar la última letra tipeada.
+
+- Escape (Esc): Cancelar el Modo Escritura y volver a la pista.
 
 # Explicaciones
 
