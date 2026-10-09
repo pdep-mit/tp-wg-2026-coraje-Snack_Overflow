@@ -22,3 +22,18 @@ object vidasVisual {
   method image() =
     "vidas_" + estudiante.concentracion().toString() + ".png"
 }
+
+object pantallaDesaprobado {
+  method position() = game.at(-3, 4)
+    
+    // Acá ponés el nombre exacto de la imagen PNG semitransparente que armaste
+    method image() = "desaprobaste.png" 
+}
+
+object filtroOscuro {
+    // Lo anclamos abajo a la izquierda
+    method position() = game.origin() 
+    
+    // Tu imagen gigante semitransparente
+    method image() = "filtro_oscuro.png" 
+}
