@@ -23,18 +23,9 @@ object estudiante {
 
   method perderConcentracion() {
     concentracion = concentracion - 1
-    // 2. ¡EL MOMENTO DEL GAME OVER!
-        if (concentracion == 0 and !yaDesaprobo) {
-            yaDesaprobo = true // Activamos el seguro
-            
-            // Reproducimos el efecto de sonido
-            game.sound("you-died-dark-souls.mp3").play()
- // 1. Agregamos el fondo oscuro primero (Capa inferior)
-    game.addVisual(filtroOscuro)
-    
-    // 2. Agregamos el texto de DESAPROBASTE (Capa superior)
-    game.addVisual(pantallaDesaprobado)
-        }
+    if (concentracion == 0 and !yaDesaprobo) {
+          self.perdiste()
+      }
   }
 
   method recuperarConcentracion(cantidad) {
@@ -47,4 +38,17 @@ object estudiante {
 
   // Provisional hasta implementar la victoria en CP2.
   method gano() = false
+
+  method perdiste() {
+      yaDesaprobo = true // Activamos el seguro
+      
+      // Reproducimos el efecto de sonido
+      game.sound("you-died-dark-souls.mp3").play()
+      
+      // 1. Agregamos el fondo oscuro primero (Capa inferior)
+      game.addVisual(filtroOscuro)
+      
+      // 2. Agregamos el texto de DESAPROBASTE (Capa superior)
+      game.addVisual(pantallaDesaprobado)
+  }
 }

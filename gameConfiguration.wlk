@@ -16,6 +16,7 @@ object ajustesDelJuego {
   // Premio escrito: este valor multiplicado por la longitud de la respuesta.
   method puntosPorLetra() = 100
   method abecedario() = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")
+  
 }
 
 /* Integración pendiente en los archivos del equipo:
@@ -51,6 +52,7 @@ object gameConfig {
     game.width(ajustesDelJuego.ancho())
     game.height(ajustesDelJuego.alto())
     game.cellSize(ajustesDelJuego.tamanioCelda())
+    game.boardGround("fondo_mental.png")
   }
 
   method agregarVisuales() {
@@ -315,15 +317,7 @@ object pistaDelJuego {
   method mostrarOpciones(letras) {}
   method retirarOpciones() {}
 }
-/*object pantallaDesaprobado {
-  // Lo ubicamos en el medio de la pantalla (el -2 es para centrar las letras)
-  method position() = game.at(ajustesDelJuego.ancho().div(2) - 2, ajustesDelJuego.alto().div(2))
-  
-  method text() = "D E S A P R O B A S T E"
-  
-  // FF0000FF significa: Rojo al máximo (FF), Verde(00), Azul(00) y Opacidad total (FF)
-  method textColor() = "FF0000FF" 
-}*/
+
 // Adaptador vacío hasta que el equipo conecte generadores y movimiento.
 object pistaSinConectar {
   method avanzar(milisegundos) {}
