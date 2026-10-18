@@ -8,6 +8,11 @@ class Respuesta {
   var premiada = false
   var mensaje = ""
 
+  method reiniciarPartida() {
+    puntos = 0
+    self.setearRespuestaEsperada([])
+  }
+
   method configurarPuntosPorLetra(cantidad) { puntosPorLetra = cantidad.max(0) }
   method puntos() = puntos
   method mensaje() = mensaje
@@ -65,7 +70,7 @@ class Respuesta {
   // Completar las pistas resuelve la pregunta, pero no otorga puntos.
   method registrarRespuestaPorLetras() {
     self.marcarRespondida()
-    mensaje = "Respuesta correcta! Completada en carriles, sin puntos"
+    mensaje = "Respuesta correcta!"
   }
 
   // Solo el acierto escrito premia; cuenta todas las letras, incluso las repetidas.
@@ -74,12 +79,13 @@ class Respuesta {
     self.marcarRespondida()
     puntos += premio
     premiada = true
-    mensaje = "Respuesta correcta! +" + premio.toString() + " puntos"
+    mensaje = "Respuesta correcta! +"  + premio.toString() + " puntos"
   }
 
   method registrarRespuestaIncorrecta() {
     mensaje = "Respuesta incorrecta. Podes volver a intentar."
   }
+
 }
 
 object respuestaActual inherits Respuesta {}
@@ -95,7 +101,11 @@ object letraAceptada {
 
 object letraIgnorada {
   method corresponde(respuesta, letra) = true
-  method aplicar(respuesta, letra) = false
+ method aplicar(respuesta, letra) {
+    // Una letra incorrecta conserva el progreso y las vidas.
+    // Se ignora sin penalizacion.
+    return false
+  }
 }
 
 object respuestaCompletadaPorLetras {

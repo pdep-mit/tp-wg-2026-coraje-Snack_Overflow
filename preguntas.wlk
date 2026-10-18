@@ -1,1 +1,0 @@
-//Agregar varias preguntas a futuro,sus respuestas estaran en el archivo correspondiente

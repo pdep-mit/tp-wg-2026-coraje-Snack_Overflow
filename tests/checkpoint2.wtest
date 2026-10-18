@@ -1,0 +1,220 @@
+import personajes.*
+import estudiante.*
+import respuestas.*
+import distracciones.*
+import letras.*
+import gameConfiguration.*
+import menu.*
+import todasLasPreguntas.*
+import wollok.game.*
+
+describe "Personajes del segundo checkpoint" {
+  test "Las subclases reciben el mismo golpe con distinto danio" {
+    const alumnos = [new Promedio(), new Violento(), new Brillante()]
+    alumnos.forEach({ alumno => alumno.perderConcentracion() })
+    assert.equals([4, 3, 4], alumnos.map({ alumno => alumno.concentracion() }))
+  }
+  test "Violento llega a cero sin vidas negativas" {
+    const alumno = new Violento()
+    (1..3).forEach({ golpe => alumno.perderConcentracion() })
+    assert.equals(0, alumno.concentracion())
+    assert.that(alumno.estaDesconcentrado())
+  }
+  test "Suerte asegura solo la proxima letra y no puede reactivarse" {
+    const alumno = new Violento()
+    const respuesta = new Respuesta()
+    respuesta.setearRespuestaEsperada(["U", "T", "N"])
+    alumno.activarHabilidad()
+    alumno.activarHabilidad()
+    respuesta.agregarLetra(alumno.letraElegida("X", respuesta))
+    assert.equals("U", respuesta.palabraArmada())
+    assert.notThat(alumno.tieneSuerte())
+    alumno.activarHabilidad()
+    respuesta.agregarLetra(alumno.letraElegida("X", respuesta))
+    assert.equals("U", respuesta.palabraArmada())
+    assert.equals(0, respuesta.puntos())
+    assert.that(alumno.habilidadUsada())
+  }
+  test "Enfoque protege 5000 ms y repetir F no extiende el escudo" {
+    const alumno = new Brillante()
+    alumno.activarHabilidad()
+    alumno.avanzarTiempo(4999)
+    alumno.perderConcentracion()
+    assert.equals(5, alumno.concentracion())
+    alumno.activarHabilidad()
+    alumno.avanzarTiempo(1)
+    alumno.perderConcentracion()
+    assert.equals(4, alumno.concentracion())
+    alumno.activarHabilidad()
+    assert.notThat(alumno.tieneEscudo())
+  }
+  test "Promedio no activa ninguna habilidad" {
+    const alumno = new Promedio()
+    alumno.activarHabilidad()
+    assert.notThat(alumno.tieneSuerte())
+    assert.notThat(alumno.tieneEscudo())
+    alumno.perderConcentracion()
+    assert.equals(4, alumno.concentracion())
+  }
+  test "Las distracciones recorren distinta distancia con cada personaje" {
+    const alumnos = [new Violento(), new Promedio(), new Brillante()]
+    const alturas = alumnos.map({ alumno =>
+      const obstaculo = new Obstaculo(image = "celular.png", position = game.at(3, 10))
+      (1..10).forEach({ paso => obstaculo.avanzar(200, alumno.velocidadObstaculos()) })
+      return obstaculo.position().y()
+    })
+    assert.equals([4, 5, 7], alturas)
+  }
+  test "Dificultad modifica velocidad y frecuencia sin cambiar el danio" {
+    estudiante.elegir(new Violento(), facil)
+    const velocidadFacil = estudiante.velocidadObstaculos()
+    const esperaFacil = estudiante.intervaloGeneracion()
+    estudiante.elegir(new Violento(), dificil)
+    assert.that(estudiante.velocidadObstaculos() > velocidadFacil)
+    assert.that(estudiante.intervaloGeneracion() < esperaFacil)
+    estudiante.perderConcentracion()
+    assert.equals(3, estudiante.concentracion())
+  }
+  test "La colision fisica aplica Suerte y resuelve sin puntos" {
+    estudiante.elegir(new Violento(), normal)
+    respuestaActual.setearRespuestaEsperada(["A"])
+    estudiante.activarHabilidad()
+    const letra = new LetraFisica(caracter = "X", position = game.at(5, 1))
+    letra.serChocadoPor(estudiante)
+    assert.that(respuestaActual.estaRespondida())
+    assert.equals("A", respuestaActual.palabraArmada())
+    assert.equals(0, respuestaActual.puntos())
+  }
+}
+
+describe "Menu y teclado integrados" {
+  method initialize() {
+    gameConfig.configurarTodo()
+    menuPrincipal.mostrar()
+    game.start()
+  }
+  method presionar(tecla) {
+    io.queueEvent("keypress", tecla)
+    game.flushEvents(game.currentTime() + 1)
+  }
+  method elegirBrillante() {
+    self.presionar("ArrowRight")
+    self.presionar("ArrowRight")
+    self.presionar("Enter")
+  }
+  test "El menu no mueve al estudiante ni avanza la partida" {
+    self.presionar("ArrowLeft")
+    assert.equals("Brillante", menuPrincipal.personajeElegido())
+    assert.equals(5, estudiante.position().x())
+    assert.notThat(game.hasVisual(estudiante))
+    (1..200).forEach({ paso => menuPrincipal.avanzar() })
+    assert.equals("menu", menuPrincipal.nombrePantalla())
+    assert.equals(5, estudiante.concentracion())
+  }
+  test "La ayuda regresa al menu conservando la seleccion" {
+    self.presionar("ArrowRight")
+    self.presionar("ArrowDown")
+    self.presionar("KeyH")
+    assert.equals("ayuda", menuPrincipal.nombrePantalla())
+    self.presionar("Escape")
+    assert.equals("menu", menuPrincipal.nombrePantalla())
+    assert.equals("Violento", menuPrincipal.personajeElegido())
+    assert.equals("Dificil", menuPrincipal.dificultadElegida())
+    self.presionar("Enter")
+    assert.equals("Violento", estudiante.nombre())
+    assert.equals("Dificil", estudiante.dificultad())
+    assert.that(game.hasVisual(estudiante))
+  }
+  test "F en escritura escribe una letra sin gastar la habilidad" {
+    self.elegirBrillante()
+    self.presionar("Enter")
+    self.presionar("KeyF")
+    assert.notThat(estudiante.habilidadUsada())
+    assert.that(gameConfig.textoDelPanel().contains("Escribi: F |"))
+    self.presionar("Escape")
+    self.presionar("KeyF")
+    assert.that(estudiante.tieneEscudo())
+  }
+  test "El reloj del escudo se pausa durante la escritura" {
+    self.elegirBrillante()
+    self.presionar("KeyF")
+    self.presionar("Enter")
+    (1..100).forEach({ paso => menuPrincipal.avanzar() })
+    assert.that(estudiante.tieneEscudo())
+    self.presionar("Escape")
+    (1..25).forEach({ paso => menuPrincipal.avanzar() })
+    assert.notThat(estudiante.tieneEscudo())
+  }
+  test "Volver al menu y jugar reinicia vidas, puntos y habilidad" {
+    self.elegirBrillante()
+    self.presionar("KeyF")
+    estudiante.avanzarTiempo(5000)
+    estudiante.perderConcentracion()
+    gameConfig.cargarPregunta(new Pregunta(enunciado = "Letra", letras = ["A"]))
+    self.presionar("Enter")
+    self.presionar("KeyA")
+    self.presionar("Enter")
+    assert.equals(100, respuestaActual.puntos())
+    self.presionar("Enter")
+    assert.equals("menu", menuPrincipal.nombrePantalla())
+    self.presionar("Enter")
+    assert.equals(5, estudiante.concentracion())
+    assert.equals(0, respuestaActual.puntos())
+    assert.notThat(estudiante.habilidadUsada())
+    assert.equals("Brillante", estudiante.nombre())
+  }
+}
+
+describe "Pista conectada a las zonas seguras" {
+  method initialize() {
+    gameConfig.configurarTodo()
+    menuPrincipal.mostrar()
+    game.start()
+    menuPrincipal.iniciarPartida()
+    gameConfig.cargarPregunta(new Pregunta(enunciado = "Universidad", letras = ["U", "T", "N"]))
+  }
+  test "La zona segura limpia distracciones y recoger una letra retoma el recorrido" {
+    (1..149).forEach({ paso => gameConfig.avanzar() })
+    const obstaculo = new Obstaculo(image = "celular.png", position = game.at(3, 10))
+    pistaDelJuego.agregarObstaculo(obstaculo)
+    gameConfig.avanzar()
+    assert.equals("zona segura", gameConfig.estado())
+    assert.notThat(game.hasVisual(obstaculo))
+    const letra = new LetraFisica(caracter = "U", position = estudiante.position())
+    gameConfig.colisionarCon(letra)
+    assert.equals("recorrido", gameConfig.estado())
+    assert.equals("U _ _", respuestaActual.textoConGuiones())
+  }
+  test "Enter vuelve al menu despues de perder y permite una nueva partida" {
+    estudiante.elegir(new Violento(), normal)
+    (1..3).forEach({ golpe =>
+      gameConfig.colisionarCon(new Obstaculo(image = "celular.png", position = estudiante.position()))
+    })
+    assert.equals("sin vidas", gameConfig.estado())
+    io.queueEvent("keypress", "Enter")
+    game.flushEvents(game.currentTime() + 1)
+    assert.equals("menu", menuPrincipal.nombrePantalla())
+    menuPrincipal.iniciarPartida()
+    assert.equals(5, estudiante.concentracion())
+    assert.equals("recorrido", gameConfig.estado())
+  }
+}
+
+test "El menu conserva sus textos y permite jugar con el motor ya iniciado" {
+  gameConfig.configurarTodo()
+  menuPrincipal.mostrar()
+  game.start()
+  assert.that(game.running())
+  menuPrincipal.cambiarPersonaje(1)
+  menuPrincipal.cambiarDificultad(1)
+  assert.that(game.allVisuals().map({ visual => visual.text() }).contains("Personaje: < Violento >"))
+  assert.that(game.allVisuals().map({ visual => visual.text() }).contains("Dificultad: < Dificil >"))
+  menuPrincipal.mostrarAyuda()
+  assert.that(game.allVisuals().map({ visual => visual.text() }).contains("COMO JUGAR"))
+  menuPrincipal.mostrar()
+  menuPrincipal.iniciarPartida()
+  assert.that(game.hasVisual(estudiante))
+  assert.equals("partida", menuPrincipal.nombrePantalla())
+  assert.equals(11, game.width())
+  assert.equals(16, game.height())
+}

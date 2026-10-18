@@ -1,24 +1,9 @@
 import gameConfiguration.*
-import generadores.*
-import todasLasPreguntas.*
-import azar.*
-import respuestas.*
+import menu.*
 import wollok.game.*
 
 program MinijuegoEstudiante {
-	//Se agrega todas las config
-	gameConfig.configurarTodo()
-	
-	// 2. Pedimos una pregunta aleatoria al nuevo objeto
-	const preguntaActual = bancoDePreguntas.preguntaAleatoria()
-	
-	// 3. Le pasamos únicamente la lista de letras a la respuesta actual
-	respuestaActual.setearRespuestaEsperada(preguntaActual.letras())
-	
-	// 4. Arrancamos los generadores con el abecedario o letras disponibles
-	generadorDeLetras.iniciar()
-	generadorDeObstaculos.iniciar()
-	generadorDeAyudas.iniciar()
-
-	game.start()
+  gameConfig.configurarTodo()
+  menuPrincipal.mostrar()
+  game.start()
 }

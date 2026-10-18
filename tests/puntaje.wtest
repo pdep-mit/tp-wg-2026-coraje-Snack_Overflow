@@ -77,7 +77,7 @@ describe "Puntaje escrito y resolucion automatica por letras" {
     assert.equals(0, respuesta.puntos())
     assert.equals("P D E P", respuesta.textoConGuiones())
     assert.equals("", respuesta.letraEsperada())
-    assert.equals("Respuesta correcta! Completada en carriles, sin puntos", respuesta.mensaje())
+    assert.equals("Respuesta correcta!", respuesta.mensaje())
   }
 
   test "No se puede cobrar escribiendo una respuesta ya completada en carriles" {

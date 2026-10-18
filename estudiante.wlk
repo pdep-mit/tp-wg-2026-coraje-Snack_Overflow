@@ -1,34 +1,48 @@
-import carriles.*
+import personajes.*
+import hud.*
 import wollok.game.*
 
+// Conserva la identidad visual y las colisiones al cambiar de personaje.
 object estudiante {
-  var carrilActual = carrilCentral
-  var concentracion = 5
+  var personaje = new Promedio()
+  var dificultad = normal
+  var yaDesaprobo = false
 
-  method image() = "player.png"
-
-  method position() = game.at(carrilActual.posicionX(), 1)
-
-  method moverIzquierda() {
-    carrilActual = carrilActual.izquierda()
+  method elegir(unPersonaje, unaDificultad) {
+    personaje = unPersonaje
+    dificultad = unaDificultad
+    yaDesaprobo = false
   }
-
-  method moverDerecha() {
-    carrilActual = carrilActual.derecha()
-  }
-
+  method nombre() = personaje.nombre()
+  method image() = personaje.image()
+  method position() = personaje.position()
+  method moverIzquierda() { personaje.moverIzquierda() }
+  method moverDerecha() { personaje.moverDerecha() }
+  method concentracion() = personaje.concentracion()
+  method estaDesconcentrado() = personaje.estaDesconcentrado()
+  method gano() = personaje.gano()
   method perderConcentracion() {
-    concentracion = concentracion - 1
+    personaje.perderConcentracion()
+    [self].filter({ p => p.estaDesconcentrado() && !yaDesaprobo }).forEach({ p => p.perdiste() })
   }
+  method recuperarConcentracion() { personaje.recuperarConcentracion() }
+  method recuperarConcentracion(cantidad) { personaje.recuperarConcentracion(cantidad) }
+  method activarEscudo() { personaje.activarEscudo() }
+  method activarHabilidad() { personaje.activarHabilidad() }
+  method avanzarTiempo(ms) { personaje.avanzarTiempo(ms) }
+  method estadoHabilidad() = personaje.estadoHabilidad()
+  method habilidadUsada() = personaje.habilidadUsada()
+  method tieneEscudo() = personaje.tieneEscudo()
+  method tieneSuerte() = personaje.tieneSuerte()
+  method letraElegida(letra, respuesta) = personaje.letraElegida(letra, respuesta)
+  method velocidadObstaculos() = personaje.velocidadObstaculos() * dificultad.factor()
+  method intervaloGeneracion() = dificultad.intervaloGeneracion()
+  method dificultad() = dificultad.nombre()
 
-  method recuperarConcentracion(cantidad) {
-    concentracion = concentracion + cantidad
+  method perdiste() {
+    yaDesaprobo = true
+    game.sound("you-died-dark-souls.mp3").play()
+    game.addVisual(filtroOscuro)
+    game.addVisual(pantallaDesaprobado)
   }
-
-  method concentracion() = concentracion
-
-  method estaDesconcentrado() = concentracion <= 0
-
-  // Provisional hasta implementar la victoria en CP2.
-  method gano() = false
 }
