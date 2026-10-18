@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Snack Overflow</title>
+    <!-- Estas bibliotecas las sirve el CLI de Wollok en el mismo servidor. -->
+    <script src="./lib/p5.min.js"></script>
+    <script src="./lib/p5.sound.min.js"></script>
+    <script src="./lib/game-index.js"></script>
+    <style>
+      body { margin: 0; }
+      main { min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+    </style>
+  </head>
+  <body>
+    <main><div id="game"></div></main>
+    <script type="module">
+      import { io } from "./lib/socket.io.esm.min.js";
+
+      const socket = io();
+      const juego = new SocketGame(socket);
+      socket.on("start", () => juego.start(document.getElementById("game")));
+
+      // Wollok Game 2.1.1 convierte Escape en "". Transmitimos la tecla real
+      // antes de p5, sin convertir otras teclas desconocidas en cancelaciones.
+      document.addEventListener("keydown", (evento) => {
+        if (evento.key !== "Escape") return;
+        evento.preventDefault();
+        evento.stopImmediatePropagation();
+        if (!evento.repeat) juego.queueKeyPressEvent("Escape", "ANY");
+      }, true);
+
+      document.addEventListener("keyup", (evento) => {
+        if (evento.key !== "Escape") return;
+        evento.preventDefault();
+        evento.stopImmediatePropagation();
+        juego.queueKeyReleaseEvent("Escape", "ANY");
+      }, true);
+    </script>
+  </body>
+</html>

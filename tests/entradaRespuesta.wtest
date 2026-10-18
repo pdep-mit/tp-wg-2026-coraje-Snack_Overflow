@@ -1,0 +1,122 @@
+import gameConfiguration.*
+import respuestas.*
+import estudiante.*
+import todasLasPreguntas.*
+import wollok.game.*
+
+describe "Teclado de respuesta y errores sin penalizacion" {
+  method initialize() {
+    gameConfig.configurarTodo()
+    gameConfig.cargarPregunta(new Pregunta(enunciado = "Universidad", letras = ["U", "T", "N"]))
+  }
+
+  method presionar(tecla) {
+    io.queueEvent("keypress", tecla)
+    game.flushEvents(game.currentTime() + 1)
+  }
+
+  test "Escape cancela incluso una respuesta correcta escrita sin enviarla" {
+    const vidaInicial = estudiante.concentracion()
+    respuestaActual.agregarLetra("U")
+    self.presionar("Enter")
+    ["KeyU", "KeyT", "KeyN"].forEach({ tecla => self.presionar(tecla) })
+    assert.equals("respondiendo", gameConfig.estado())
+    self.presionar("Escape")
+    assert.equals("recorrido", gameConfig.estado())
+    assert.equals("U _ _", respuestaActual.textoConGuiones())
+    assert.notThat(respuestaActual.estaRespondida())
+    assert.equals(0, respuestaActual.puntos())
+    assert.equals(vidaInicial, estudiante.concentracion())
+    self.presionar("ArrowLeft")
+    assert.equals(3, estudiante.position().x())
+  }
+
+  test "Reabrir despues de Escape presenta un borrador vacio" {
+    self.presionar("Enter")
+    self.presionar("KeyX")
+    self.presionar("Escape")
+    self.presionar("Enter")
+    assert.equals("respondiendo", gameConfig.estado())
+    assert.that(gameConfig.textoDelPanel().contains("Escribi:  |"))
+  }
+
+  test "Una tecla desconocida no se interpreta como Escape" {
+    self.presionar("Enter")
+    self.presionar("KeyU")
+    self.presionar("")
+    assert.equals("respondiendo", gameConfig.estado())
+    assert.that(gameConfig.textoDelPanel().contains("Escribi: U |"))
+  }
+
+  test "Escape fuera de la escritura no cambia la partida" {
+    self.presionar("Escape")
+    assert.equals("recorrido", gameConfig.estado())
+    assert.equals(0, respuestaActual.puntos())
+    assert.equals(5, estudiante.concentracion())
+  }
+
+  test "Varios intentos incorrectos conservan vidas, puntos y pistas" {
+    respuestaActual.agregarLetra("U")
+    (1..10).forEach({ intento =>
+      self.presionar("Enter")
+      self.presionar("KeyX")
+      self.presionar("Enter")
+    })
+    assert.equals("recorrido", gameConfig.estado())
+    assert.equals(5, estudiante.concentracion())
+    assert.equals(0, respuestaActual.puntos())
+    assert.equals("U _ _", respuestaActual.textoConGuiones())
+    assert.notThat(respuestaActual.estaRespondida())
+  }
+
+  test "Confirmar un borrador vacio tampoco penaliza" {
+    self.presionar("Enter")
+    self.presionar("Enter")
+    assert.equals(5, estudiante.concentracion())
+    assert.equals(0, respuestaActual.puntos())
+    assert.notThat(respuestaActual.estaRespondida())
+  }
+}
+
+class PistaParaCancelar {
+  var avances = 0
+  var opciones = []
+  method avanzar(milisegundos) { avances += 1 }
+  method limpiarObstaculos() {}
+  method mostrarOpciones(letras) { opciones = letras.copy() }
+  method retirarOpciones() { opciones = [] }
+  method avances() = avances
+  method opciones() = opciones.copy()
+}
+
+object tiemposParaCancelar {
+  method intervaloDeActualizacion() = 100
+  method duracionRecorrido() = 100
+  method duracionZonaSegura() = 300
+  method puntosPorLetra() = 100
+  method abecedario() = ajustesDelJuego.abecedario()
+}
+
+test "Cancelar vuelve a la zona segura con las mismas opciones y tiempo pendiente" {
+  const pista = new PistaParaCancelar()
+  const respuesta = new Respuesta()
+  const sesion = new SesionDeJuego(respuesta = respuesta, ajustes = tiemposParaCancelar)
+  sesion.conectarPista(pista)
+  sesion.cargarPregunta(new Pregunta(enunciado = "Universidad", letras = ["U", "T", "N"]))
+  sesion.avanzar()
+  sesion.avanzar()
+  const opciones = pista.opciones()
+  const avances = pista.avances()
+  sesion.presionarEnter()
+  sesion.escribir("X")
+  (1..10).forEach({ paso => sesion.avanzar() })
+  sesion.cancelar()
+  assert.equals("zona segura", sesion.estado())
+  assert.equals("", sesion.borrador())
+  assert.equals(opciones, pista.opciones())
+  assert.equals(avances, pista.avances())
+  sesion.avanzar()
+  assert.equals("zona segura", sesion.estado())
+  sesion.avanzar()
+  assert.equals("recorrido", sesion.estado())
+}

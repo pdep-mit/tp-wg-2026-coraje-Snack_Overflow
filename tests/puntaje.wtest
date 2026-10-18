@@ -1,6 +1,7 @@
 import respuestas.*
 import gameConfiguration.*
 import todasLasPreguntas.*
+import estudiante.*
 
 class AlumnoParaPuntaje {
   var vidas = 5
@@ -26,8 +27,8 @@ object tiemposParaPuntaje {
 }
 
 describe "Puntaje escrito y resolucion automatica por letras" {
-  const alumno = new AlumnoParaPuntaje()
-  const respuesta = new Respuesta(receptorDeErrores = alumno)
+  const alumno = estudiante
+  const respuesta = new Respuesta()
 
   test "Una respuesta escrita de tres letras da 300 puntos" {
     respuesta.setearRespuestaEsperada(["U", "T", "N"])
@@ -54,14 +55,15 @@ describe "Puntaje escrito y resolucion automatica por letras" {
     assert.equals(400, respuesta.puntos())
   }
 
-  test "Una respuesta escrita incorrecta no da puntos ni cierra la pregunta" {
+  test "Una respuesta escrita incorrecta no penaliza ni cierra la pregunta" {
     respuesta.setearRespuestaEsperada(["U", "T", "N"])
     respuesta.agregarLetra("U")
     assert.notThat(respuesta.responder("UBA"))
     assert.equals(0, respuesta.puntos())
     assert.notThat(respuesta.estaRespondida())
     assert.equals("U _ _", respuesta.textoConGuiones())
-    assert.equals(4, alumno.concentracion())
+    assert.equals(5, alumno.concentracion())
+    assert.equals("Respuesta incorrecta. Podes volver a intentar.", respuesta.mensaje())
   }
 
   test "La ultima letra recogida resuelve automaticamente sin premio" {
@@ -145,7 +147,7 @@ describe "Puntaje escrito y resolucion automatica por letras" {
 
 describe "La sesion reconoce ambas formas de resolver" {
   const alumno = new AlumnoParaPuntaje()
-  const respuesta = new Respuesta(receptorDeErrores = alumno)
+  const respuesta = new Respuesta()
   const pista = new PistaParaPuntaje()
   const sesion = new SesionDeJuego(respuesta = respuesta, jugador = alumno, ajustes = tiemposParaPuntaje)
 

@@ -5,7 +5,7 @@ object estudiante {
   var carrilActual = carrilCentral
   var concentracion = 5
 
-  method image() = "estudiante.png"
+  method image() = "player.png"
 
   method position() = game.at(carrilActual.posicionX(), 1)
 

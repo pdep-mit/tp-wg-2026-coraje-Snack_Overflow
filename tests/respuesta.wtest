@@ -30,7 +30,7 @@ describe "Pruebas del sistema de respuestas y validación de letras" {
     // La palabra armada debe seguir vacía porque se rechazó el ingreso
     assert.equals("", respuestaActual.palabraArmada())
     
-    // Una letra equivocada no penaliza; una respuesta escrita equivocada sí.
+    // Las letras y las respuestas escritas incorrectas no penalizan.
     assert.equals(vidaInicial, estudiante.concentracion())
   }
   

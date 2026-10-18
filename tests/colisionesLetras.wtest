@@ -29,7 +29,7 @@ describe "Pruebas de colisión con Letras Físicas" {
     assert.equals(vidaInicial, estudiante.concentracion())
   }
   
-  test "Chocar con la letra física INCORRECTA delega el error y resta vida" {
+  test "Chocar con la letra física INCORRECTA la descarta sin restar vida" {
     const vidaInicial = estudiante.concentracion()
     
     
@@ -45,7 +45,7 @@ describe "Pruebas de colisión con Letras Físicas" {
     // Verificamos que la palabra sigue vacía (se rechazó)
     assert.equals("", respuestaActual.palabraArmada())
     
-    // Verificamos que la penalización llegó al estudiante
-    assert.equals(vidaInicial - 1, estudiante.concentracion())
+    // Una letra incorrecta no modifica las vidas del estudiante.
+    assert.equals(vidaInicial, estudiante.concentracion())
   }
 }

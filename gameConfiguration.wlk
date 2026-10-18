@@ -61,6 +61,8 @@ object gameConfig {
     keyboard.right().onPressDo({ sesion.moverDerecha() })
     keyboard.enter().onPressDo({ sesion.presionarEnter() })
     keyboard.backspace().onPressDo({ sesion.borrar() })
+    // assets/juego.html transmite Escape también en Wollok Game 2.1.1,
+    // cuyo cliente predeterminado descarta el código de esta tecla.
     new Key(keyCodes = ["Escape"]).onPressDo({ sesion.cancelar() })
     ajustesDelJuego.abecedario().forEach({ letra =>
       keyboard.letter(letra).onPressDo({ sesion.escribir(letra) })
@@ -164,7 +166,10 @@ class SesionDeJuego {
 
   method agregarAlBorrador(letra) { borrador += letra.toUpperCase() }
   method borrarDelBorrador() { borrador = borrador.take((borrador.size() - 1).max(0)) }
-  method volverALaPista() { modo = modoSuspendido }
+  method volverALaPista() {
+    borrador = ""
+    modo = modoSuspendido
+  }
   method confirmarRespuesta() {
     respuesta.responder(borrador)
     self.volverALaPista()

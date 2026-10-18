@@ -6,7 +6,7 @@
 - Stefano Lucero
 - Candela Fava
 - Joaquin Silva 
-- Nombre y Apellido
+- Nicolás Bidone
 
 ## Consignas
 
@@ -20,7 +20,7 @@ Recuerden que para cada checkpoint hay [expectativas mínimas](https://docs.goog
 - Para la demo final, crear un nuevo tag **demo** y actualizar este README con todo lo necesario.
 
 # Cómo jugar
-El jugador debe esquivar usando a|d para moverse entre railes y cuando aparezcan las letras si es la correcta para responder a la pregunta, hacer que el personaje colisione con la misma repitiendo hasta completar la respuesta
+El jugador debe esquivar usando las flechas izquierda/derecha para moverse entre carriles. Cuando aparezcan las letras, debe recoger la siguiente letra correcta hasta completar la respuesta.
 
 ## Objetivo
 
@@ -28,7 +28,27 @@ El jugador debe esquivar las distracciones que tiene su personaje mientras inten
 
 ## Controles
 
-TODO
+- Flechas izquierda/derecha: cambiar de carril.
+- Enter: abrir el modo de respuesta; volver a pulsarlo para confirmar.
+- Letras A–Z: escribir la respuesta. Backspace: borrar.
+- Escape: cancelar la escritura y regresar al modo anterior conservando las pistas.
+- Las respuestas incorrectas no descuentan vidas ni puntos.
+
+## Ejecutar con Escape habilitado
+
+Desde la carpeta del proyecto:
+
+```sh
+wollok run juego.MinijuegoEstudiante -p . --port 4202
+```
+
+Abrir [el juego](http://localhost:4202/juego.html). Si se usa otro puerto,
+agregar `/juego.html` a la dirección que muestra Wollok.
+
+Esta página usa el motor de Wollok Game instalado y transmite la tecla Escape
+correctamente. El cliente predeterminado de Wollok Game 2.1.1 (la página `/`)
+no reconoce esa tecla; por eso se incluye `assets/juego.html` en el proyecto.
+No hace falta modificar ni reinstalar el CLI.
 
 # Explicaciones
 

@@ -1,8 +1,5 @@
-import estudiante.*
-
-// No conoce el tablero. El receptor de errores se puede reemplazar en los tests.
+// Valida respuestas y registra puntos; no administra las vidas del estudiante.
 class Respuesta {
-  const receptorDeErrores = estudiante
   var letrasEsperadas = []
   var letrasAcertadas = []
   var puntos = 0
@@ -81,8 +78,7 @@ class Respuesta {
   }
 
   method registrarRespuestaIncorrecta() {
-    receptorDeErrores.perderConcentracion()
-    mensaje = "Respuesta incorrecta: -1 vida"
+    mensaje = "Respuesta incorrecta. Podes volver a intentar."
   }
 }
 
