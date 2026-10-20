@@ -41,12 +41,13 @@ object gameConfig {
     game.cellSize(ajustesDelJuego.tamanioCelda())
     game.boardGround("fondo_mental.png")
   }
+  
 
   method agregarVisuales() {
     [estudiante, preguntaVisual, palabraArmadaVisual, vidasVisual, habilidadVisual, panelDeRespuesta, resultadoVisual, puntajeVisual].forEach({ visual => game.addVisual(visual) })
   }
 
-  method configurarTeclas() {
+method configurarTeclas() {
     keyboard.left().onPressDo({ menuPrincipal.izquierda() })
     keyboard.right().onPressDo({ menuPrincipal.derecha() })
     keyboard.up().onPressDo({ menuPrincipal.arriba() })
@@ -56,9 +57,13 @@ object gameConfig {
     // assets/juego.html transmite Escape también en Wollok Game 2.1.1,
     // cuyo cliente predeterminado descarta el código de esta tecla.
     new Key(keyCodes = ["Escape"]).onPressDo({ menuPrincipal.cancelar() })
+    
     ajustesDelJuego.abecedario().forEach({ letra =>
       keyboard.letter(letra).onPressDo({ menuPrincipal.letra(letra) })
     })
+
+    // Botón de reinicio para la partida / modo infinito
+    keyboard.r().onPressDo({ menuPrincipal.reiniciarJuego() })
   }
 
   method configurarColisiones() {

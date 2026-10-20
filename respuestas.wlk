@@ -86,6 +86,12 @@ class Respuesta {
     mensaje = "Respuesta incorrecta. Podes volver a intentar."
   }
 
+method completarLetraComodin() {
+    if (self.hayPregunta() && !respondida && !self.estaCompleta()) {
+      const siguienteLetra = self.letraEsperada()
+      self.registrarLetra(siguienteLetra)
+    }
+  }
 }
 
 object respuestaActual inherits Respuesta {}

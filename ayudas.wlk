@@ -1,7 +1,7 @@
 //Aca se pondran todos los object que le den una ayuda al estudiante al interactuar con ella
 import estudiante.*
 import wollok.game.*
-
+import respuestas.*
 
 object cafe {
   var property position = game.at(0, 0) 
@@ -40,5 +40,13 @@ object apuntes {
     if (position.y() < 0) {
       game.removeVisual(self)
     }
+  }
+}
+
+class AyudaClaude inherits ObjetoJuego {
+  // image = "claude.png"
+  override method serChocadoPor(unEstudiante) {
+    respuestaActual.completarLetraComodin() 
+    game.removeVisual(self)
   }
 }

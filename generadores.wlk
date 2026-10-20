@@ -15,3 +15,14 @@ object generadorDeObstaculos {
         pistaDelJuego.agregarObstaculo(obstaculo)
     }
 }
+object generadorDeAyudas {
+    method generarAyuda() {
+        const carrilElegido = azar.carrilAleatorio()
+        const tipoAyuda = azar.elementoDe([
+            new AyudaClaude(image = "claude.png", position = game.at(carrilElegido.posicionX(), 10))
+            
+        ])
+        
+        pistaDelJuego.agregarObstaculo(tipoAyuda) 
+    }
+}
