@@ -76,7 +76,7 @@ method configurarTeclas() {
     })
 
     // Botón de reinicio para la partida / modo infinito
-    keyboard.r().onPressDo({ menuPrincipal.reiniciarJuego() })
+ //   keyboard.r().onPressDo({ menuPrincipal.reiniciarJuego() })
   }
 
   method configurarColisiones() {
@@ -330,6 +330,7 @@ object pistaDelJuego {
   const obstaculos = []
   const opciones = []
   var tiempoParaProximoObstaculo = 1000
+  var tiempoParaProximaAyuda =5000 
   var zonaSegura = false
 
   method agregarObstaculo(elemento) {
@@ -349,11 +350,21 @@ object pistaDelJuego {
     [self].filter({ pista => !zonaSegura }).forEach({ pista => pista.generarDurante(milisegundos) })
   }
   method generarDurante(milisegundos) {
+// 1. Reloj de Obstáculos
     tiempoParaProximoObstaculo -= milisegundos
-    [self].filter({ pista => tiempoParaProximoObstaculo <= 0 }).forEach({ pista =>
-      generadorDeObstaculos.generar()
-      tiempoParaProximoObstaculo = estudiante.intervaloGeneracion()
-    })
+    if (tiempoParaProximoObstaculo <= 0) {
+        generadorDeObstaculos.generar()
+        // Asumiendo que el estudiante conoce la dificultad actual:
+        tiempoParaProximoObstaculo = estudiante.intervaloGeneracion()
+    }
+
+    // 2. Reloj de Ayudas (Independiente)
+    tiempoParaProximaAyuda -= milisegundos
+    if (tiempoParaProximaAyuda <= 0) {
+        generadorDeAyudas.generarAyuda()
+        // Calculamos un nuevo tiempo aleatorio basado en la dificultad
+        tiempoParaProximaAyuda = estudiante.intervaloGeneracionAyuda()
+    }
   }
   method limpiarObstaculos() {
     obstaculos.filter({ e => game.hasVisual(e) }).forEach({ e => game.removeVisual(e) })

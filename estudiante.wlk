@@ -37,6 +37,7 @@ object estudiante {
   method letraElegida(letra, respuesta) = personaje.letraElegida(letra, respuesta)
   method velocidadObstaculos() = personaje.velocidadObstaculos() * dificultad.factor()
   method intervaloGeneracion() = dificultad.intervaloGeneracion()
+  method intervaloGeneracionAyuda() = dificultad.intervaloGeneracionAyuda()
   method dificultad() = dificultad.nombre()
 
   method perdiste() {

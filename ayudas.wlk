@@ -2,51 +2,27 @@
 import estudiante.*
 import wollok.game.*
 import respuestas.*
-
-object cafe {
-  var property position = game.at(0, 0) 
+import distracciones.*
+class Cafe inherits ObjetoJuego(image = "cafe.png") {
   
-  method image() = "cafe.png"
-  
-  // --- Interacciones (Polimorfismo CP1) ---
-  method serChocadoPor(unEstudiante) {
+  override method serChocadoPor(unEstudiante) {
     unEstudiante.recuperarConcentracion()
     game.removeVisual(self)
   }
-  
-  // --- Movimiento (Temporal CP1) ---
-  method bajar() {
-    position = position.down(1)
-    
-    if (position.y() < 0) {
-      game.removeVisual(self)
-    }
-  }
+
 }
 
-object apuntes {
-  var property position = game.at(0, 0) // 
-  
-  method image() = "apuntes.png"
-  
-  method serChocadoPor(unEstudiante) {
+class Apuntes inherits ObjetoJuego(image = "apuntes.png") {
+  override  method serChocadoPor(unEstudiante) {
     unEstudiante.activarEscudo()
     game.removeVisual(self)
   }
-  
-  method bajar() {
-    position = position.down(1)
-    
-    if (position.y() < 0) {
-      game.removeVisual(self)
-    }
-  }
 }
 
-class AyudaClaude inherits ObjetoJuego {
-  // image = "claude.png"
+class AyudaClaude inherits ObjetoJuego(image = "claude.png") {
   override method serChocadoPor(unEstudiante) {
     respuestaActual.completarLetraComodin() 
     game.removeVisual(self)
   }
+
 }

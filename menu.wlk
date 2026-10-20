@@ -54,50 +54,60 @@ object menuPrincipal {
     visuales.forEach({ visual => game.removeVisual(visual) })
     visuales.clear()
   }
-  method dibujar(lineas) {
-    self.limpiar()
-    var altura = 14
-    lineas.forEach({ linea =>
-      const visual = new TextoMenu(contenido = linea, altura = altura)
-      visuales.add(visual)
-      game.addVisual(visual)
-      altura -= 1
-    })
+method dibujar(lineas) {
+      self.limpiar()
+      var altura = 14
+      lineas.forEach({ linea =>
+          const visual = new TextoMenu(
+              contenido = linea.texto(), 
+              altura = altura,
+              color = linea.color()
+          )
+          visuales.add(visual)
+          game.addVisual(visual)
+          altura -= 1
+      })
   }
   method mostrar() {
     gameConfig.quitarVisuales()
     pistaDelJuego.reiniciar()
     pantalla = new PantallaMenu()
-    self.dibujar([
-      "SNACK OVERFLOW", "Examen a la carrera", "",
-      "Personaje: < " + self.personajeElegido() + " >",
-      personajes.get(indicePersonaje).descripcion(),
-      personajes.get(indicePersonaje).habilidad(),
-      "Habilidades: un uso por partida",
-      "Dificultad: < " + self.dificultadElegida() + " >",
-      "",
-      "Izquierda / Derecha: elegir personaje",
-      "Arriba / Abajo: elegir dificultad",
-      "Enter: jugar | H: instrucciones"
-    ])
+self.dibujar([
+          // Usamos la nueva clase. Al título le damos un color, al resto nada (queda blanco).
+          new LineaMenu(texto = "SNACK OVERFLOW", color = "FF00A6FF"), // Rosa Danganronpa
+          new LineaMenu(texto = "Examen a la carrera"),
+          new LineaMenu(texto = ""),
+          new LineaMenu(texto = "Personaje: < " + self.personajeElegido() + " >", color = "00FFFFFF"),
+          new LineaMenu(texto = personajes.get(indicePersonaje).descripcion()),
+          new LineaMenu(texto = personajes.get(indicePersonaje).habilidad()),
+          new LineaMenu(texto = "Habilidades: un uso por partida", color = "FFFF00FF"), // Amarillo
+          new LineaMenu(texto = "Dificultad: < " + self.dificultadElegida() + " >", color = "00FFFFFF"),
+          new LineaMenu(texto = ""),
+          new LineaMenu(texto = "Izquierda / Derecha: elegir personaje"),
+          new LineaMenu(texto = "Arriba / Abajo: elegir dificultad"),
+          new LineaMenu(texto = "Enter: jugar | H: instrucciones", color = "00FF00FF") 
+      ])
   }
-  method mostrarAyuda() {
-    pantalla = new PantallaAyuda()
-    self.dibujar([
-      "COMO JUGAR", "Esquiva distracciones y responde la pregunta.",
-      "Cada 30 s hay una zona sin obstaculos.",
-      "Recoge en orden las letras de la respuesta.",
-      "Completarla en carriles no da puntos.",
-      "Escribirla bien da 100 puntos por letra.",
-      "Equivocarte al responder no quita vidas.",
-      "Flechas: moverse | Enter: escribir / enviar",
-      "A-Z: escribir | Backspace: borrar | Esc: volver",
-      "F: habilidad, UNA vez por partida",
-      "Violento: Suerte asegura la proxima letra.",
-      "Brillante: Enfoque protege durante 5 s.",
-      "Promedio: sin habilidad. M: menu al terminar.",
-      "Esc o Enter: volver al menu"
-    ])
+method mostrarAyuda() {
+      pantalla = new PantallaAyuda()
+      self.dibujar([
+          new LineaMenu(texto = "COMO JUGAR", color = "FF00A6FF"), // Rosa Danganronpa para el título
+          new LineaMenu(texto = "Esquiva distracciones y responde la pregunta.", color = "00FFFFFF"),
+          new LineaMenu(texto = "Cada 30 s hay una zona sin obstaculos.", color = "00FFFFFF"),
+          new LineaMenu(texto = "Recoge en orden las letras de la respuesta.", color = "FFFF00FF"), // Amarillo (regla importante)
+        //  new LineaMenu(texto = "Completarla en carriles no da puntos.", color = "00FFFFFF"),
+       //   new LineaMenu(texto = "Escribirla bien da 100 puntos por letra.", color = "00FFFFFF"),
+      //    new LineaMenu(texto = "Equivocarte al responder no quita vidas.", color = "FFFF00FF"), // Amarillo (aclaración clave)
+          new LineaMenu(texto = ""),
+          new LineaMenu(texto = "Flechas: moverse | Enter: escribir / enviar", color = "00FF00FF"), // Verde para los controles principales
+          new LineaMenu(texto = "A-Z: escribir | Backspace: borrar | Esc: volver", color = "00FF00FF"), // Verde
+          new LineaMenu(texto = ""),
+          new LineaMenu(texto = "Violento: Suerte asegura la proxima letra.", color = "00FFFFFF"),
+          new LineaMenu(texto = "Brillante: Enfoque protege durante 5 s.", color = "00FFFFFF"),
+          new LineaMenu(texto = "Promedio: sin habilidad. M: menu al terminar.", color = "00FFFFFF"),
+          new LineaMenu(texto = ""),
+          new LineaMenu(texto = "Esc o Enter: volver al menu", color = "00FF00FF") // Verde
+      ])
   }
   method iniciarPartida() {
     self.limpiar()
@@ -114,10 +124,17 @@ object menuPrincipal {
 class TextoMenu {
   const contenido
   const altura
+  const color = "FFFFFFFF"
   method position() = game.at(ajustesDelJuego.ancho().div(2), altura)
   method text() = contenido
-  method textColor() = "FFFFFF"
+  method textColor() = color
 }
+
+class LineaMenu {
+    const property texto
+    const property color = "FFFFFFFF" // Si no le pasás color, es blanco
+}
+
 class Pantalla {
   method nombre() = "pantalla"
   method izquierda() {}

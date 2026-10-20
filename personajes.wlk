@@ -114,8 +114,10 @@ class Dificultad {
   const factor
   method nombre() = nombre
   method factor() = factor
-  method intervaloGeneracion() = 1400 / factor
+  method intervaloGeneracion() = (8..15).anyOne()* 100 * factor
+  method intervaloGeneracionAyuda() = (10..15).anyOne() * 1000 * factor 
+  //Necesaria la multiplicacion *100/1000 debido a que relentiza debido al uso de RAM en caso contrario
 }
-object facil inherits Dificultad(nombre = "Facil", factor = 0.75) {}
+object facil inherits Dificultad(nombre = "Facil", factor = 1.5) {}
 object normal inherits Dificultad(nombre = "Normal", factor = 1) {}
-object dificil inherits Dificultad(nombre = "Dificil", factor = 1.25) {}
+object dificil inherits Dificultad(nombre = "Dificil", factor = 0.75) {}
