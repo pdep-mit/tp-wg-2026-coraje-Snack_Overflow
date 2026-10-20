@@ -43,9 +43,22 @@ object gameConfig {
   }
   
 
-  method agregarVisuales() {
-    [estudiante, preguntaVisual, palabraArmadaVisual, vidasVisual, habilidadVisual, panelDeRespuesta, resultadoVisual, puntajeVisual].forEach({ visual => game.addVisual(visual) })
-  }
+ 
+method agregarVisuales() {
+  [
+    estudiante,
+    preguntaVisual,
+    palabraArmadaVisual,
+    vidasVisual,
+    habilidadVisual,
+    imagenPersonajeVisual,
+    nombrePersonajeVisual,
+    panelDeRespuesta,
+    resultadoVisual,
+    puntajeVisual
+  ].forEach({ visual => game.addVisual(visual) })
+}
+
 
 method configurarTeclas() {
     keyboard.left().onPressDo({ menuPrincipal.izquierda() })
@@ -75,11 +88,26 @@ method configurarTeclas() {
     game.onTick(ajustesDelJuego.intervaloDeActualizacion(), "actualizarExamen", { menuPrincipal.avanzar() })
   }
 
-  method quitarVisuales() {
-    [estudiante, preguntaVisual, palabraArmadaVisual, vidasVisual, habilidadVisual,
-      panelDeRespuesta, resultadoVisual, puntajeVisual, filtroOscuro, pantallaDesaprobado]
-      .filter({ visual => game.hasVisual(visual) }).forEach({ visual => game.removeVisual(visual) })
-  }
+
+method quitarVisuales() {
+  [
+    estudiante,
+    preguntaVisual,
+    palabraArmadaVisual,
+    vidasVisual,
+    habilidadVisual,
+    imagenPersonajeVisual,
+    nombrePersonajeVisual,
+    panelDeRespuesta,
+    resultadoVisual,
+    puntajeVisual,
+    filtroOscuro,
+    pantallaDesaprobado
+  ]
+  .filter({ visual => game.hasVisual(visual) })
+  .forEach({ visual => game.removeVisual(visual) })
+}
+
   method moverIzquierda() { sesion.moverIzquierda() }
   method moverDerecha() { sesion.moverDerecha() }
   method presionarEnter() { sesion.presionarEnter() }
@@ -226,7 +254,9 @@ class ModoCarriles inherits ModoDeJuego {
 class ModoRecorrido inherits ModoCarriles {
   var transcurrido = 0
   override method nombre() = "recorrido"
-  override method indicacion(sesion) = "Flechas: carriles | Enter: responder"
+  override method indicacion(sesion) =
+  "Flechas: moverse | Enter: escribir"
+
   override method iniciar(sesion) {
     sesion.retirarOpciones()
     sesion.cambiarModo(self)
@@ -241,7 +271,9 @@ class ModoRecorrido inherits ModoCarriles {
 class ModoZonaSegura inherits ModoCarriles {
   var transcurrido = 0
   override method nombre() = "zona segura"
-  override method indicacion(sesion) = "Elegi una letra | Enter: responder"
+  override method indicacion(sesion) =
+  "Flechas: elegir letra | Enter: escribir"
+
   override method corresponde(sesion, tiempo) = tiempo >= sesion.tiempoDeRecorrido() && sesion.puedeOfrecerLetras()
   override method iniciar(sesion) {
     sesion.cambiarModo(self)
@@ -265,7 +297,9 @@ object continuarModo inherits ModoDeJuego {}
 
 class ModoEscritura inherits ModoDeJuego {
   override method nombre() = "respondiendo"
-  override method indicacion(sesion) = "Escribi: " + sesion.borrador() + " | Enter: confirmar | Esc: volver"
+  override method indicacion(sesion) =
+  "Texto: " + sesion.borrador() + " | Enter: enviar | Esc: volver"
+
   override method escribir(sesion, letra) { sesion.agregarAlBorrador(letra) }
   override method borrar(sesion) { sesion.borrarDelBorrador() }
   override method cancelar(sesion) { sesion.volverALaPista() }

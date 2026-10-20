@@ -16,12 +16,14 @@ object palabraArmadaVisual {
   //method text() = respuestaActual.palabraArmada()
 }
 
+
 object vidasVisual {
-  method position() = game.at(6, 11)
+  method position() = game.at(6, 14)
 
   method image() =
     "vidas_" + estudiante.concentracion().min(5).toString() + ".png"
 }
+
 
 object pantallaDesaprobado {
   method position() = game.at(-3, 4)
@@ -38,6 +40,16 @@ object filtroOscuro {
     method image() = "filtro_oscuro.png"
 }
 object habilidadVisual {
-  method position() = game.at(5, 14)
+  method position() = game.at(3, 14)
   method text() = estudiante.estadoHabilidad()
+}
+object imagenPersonajeVisual {
+  method position() = game.at(1, 13)
+  method image() = estudiante.image()
+}
+
+
+object nombrePersonajeVisual {
+  method position() = game.at(3, 13)
+  method text() = estudiante.nombre()
 }
