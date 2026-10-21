@@ -1,9 +1,10 @@
 import estudiante.*
 import wollok.game.*
+import azar.*
 
 class ObjetoJuego {
-  var property position
   const property image 
+  var property position = game.at(azar.carrilAleatorio().posicionX(), 10)
     var progresoCaida = 0
 
     method avanzar(ms, velocidad) {
