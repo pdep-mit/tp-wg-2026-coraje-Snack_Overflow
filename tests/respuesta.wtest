@@ -1,5 +1,5 @@
+import gameConfiguration.*
 import respuestas.*
-import estudiante.*
 
 describe "Pruebas del sistema de respuestas y validación de letras" {
   method initialize() {
@@ -7,33 +7,33 @@ describe "Pruebas del sistema de respuestas y validación de letras" {
     // Preparamos el objeto con una palabra de prueba.
     respuestaActual.setearRespuestaEsperada(["P", "D", "E", "P"])
   }
-  
+
   test "Agarrar la letra correcta la suma a la palabra armada y no resta vida" {
-    const vidaInicial = estudiante.concentracion()
-    
+    const vidaInicial = gameConfig.jugador().concentracion()
+
     // La primera letra esperada es la "P"
     respuestaActual.agregarLetra("P")
-    
+
     // Verificamos que la letra se guardó
     assert.equals("P", respuestaActual.palabraArmada())
-    
+
     // Verificamos que el estudiante no fue penalizado
-    assert.equals(vidaInicial, estudiante.concentracion())
+    assert.equals(vidaInicial, gameConfig.jugador().concentracion())
   }
-  
+
   test "Agarrar una letra incorrecta la rechaza sin restar vida" {
-    const vidaInicial = estudiante.concentracion()
-    
+    const vidaInicial = gameConfig.jugador().concentracion()
+
     // La primera letra esperada es "P", pero el jugador agarra una "X"
     respuestaActual.agregarLetra("X")
-    
+
     // La palabra armada debe seguir vacía porque se rechazó el ingreso
     assert.equals("", respuestaActual.palabraArmada())
-    
+
     // Las letras y las respuestas escritas incorrectas no penalizan.
-    assert.equals(vidaInicial, estudiante.concentracion())
+    assert.equals(vidaInicial, gameConfig.jugador().concentracion())
   }
-  
+
   test "Completar toda la palabra responde automaticamente sin puntos" {
     const puntosIniciales = respuestaActual.puntos()
     // Simulamos que el jugador agarra todas las letras bien y en orden
@@ -41,10 +41,10 @@ describe "Pruebas del sistema de respuestas y validación de letras" {
     respuestaActual.agregarLetra("D")
     respuestaActual.agregarLetra("E")
     respuestaActual.agregarLetra("P")
-    
+
     // Verificamos que se concatenó correctamente
     assert.equals("PDEP", respuestaActual.palabraArmada())
-    
+
     // Verificamos que el estado de la respuesta ahora es completo (para el CP2)
     assert.that(respuestaActual.estaCompleta())
     assert.that(respuestaActual.estaRespondida())

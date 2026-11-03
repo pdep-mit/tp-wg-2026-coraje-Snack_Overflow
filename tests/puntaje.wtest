@@ -1,7 +1,6 @@
 import respuestas.*
 import gameConfiguration.*
 import todasLasPreguntas.*
-import estudiante.*
 
 class AlumnoParaPuntaje {
   var vidas = 5
@@ -27,7 +26,7 @@ object tiemposParaPuntaje {
 }
 
 describe "Puntaje escrito y resolucion automatica por letras" {
-  const alumno = estudiante
+  const alumno = gameConfig.jugador()
   const respuesta = new Respuesta()
 
   test "Una respuesta escrita de tres letras da 300 puntos" {

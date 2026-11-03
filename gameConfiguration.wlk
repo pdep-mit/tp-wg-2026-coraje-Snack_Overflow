@@ -1,4 +1,4 @@
-import estudiante.*
+import personajes.*
 import menu.*
 import letras.*
 import carriles.*
@@ -24,6 +24,20 @@ object ajustesDelJuego {
 
 object gameConfig {
   const sesion = new SesionDeJuego()
+  var dificultad = normal
+
+  method jugador() = sesion.jugador()
+  method dificultad() = dificultad.nombre()
+  method velocidadObstaculos() = self.jugador().velocidadObstaculos() * dificultad.factor()
+  method intervaloGeneracion() = dificultad.intervaloGeneracion()
+  method intervaloGeneracionAyuda() = dificultad.intervaloGeneracionAyuda()
+  method elegirPersonaje(personaje, unaDificultad) {
+    self.quitarVisuales()
+    io.removeCollitionHandler(self.jugador().identity())
+    sesion.elegirPersonaje(personaje)
+    dificultad = unaDificultad
+    self.configurarColisiones()
+  }
 
   method configurarTodo() {
     self.configurarTablero()
@@ -41,12 +55,10 @@ object gameConfig {
     game.cellSize(ajustesDelJuego.tamanioCelda())
     game.boardGround("fondo_mental.png")
   }
-  
 
- 
 method agregarVisuales() {
   [
-    estudiante,
+    self.jugador(),
     preguntaVisual,
     palabraArmadaVisual,
     vidasVisual,
@@ -59,18 +71,17 @@ method agregarVisuales() {
   ].forEach({ visual => game.addVisual(visual) })
 }
 
-
 method configurarTeclas() {
-    keyboard.left().onPressDo({ menuPrincipal.izquierda() })
-    keyboard.right().onPressDo({ menuPrincipal.derecha() })
-    keyboard.up().onPressDo({ menuPrincipal.arriba() })
-    keyboard.down().onPressDo({ menuPrincipal.abajo() })
+  keyboard.left().onPressDo({ menuPrincipal.izquierda() })
+  keyboard.right().onPressDo({ menuPrincipal.derecha() })
+  keyboard.up().onPressDo({ menuPrincipal.arriba() })
+  keyboard.down().onPressDo({ menuPrincipal.abajo() })
     keyboard.enter().onPressDo({ menuPrincipal.confirmar() })
     keyboard.backspace().onPressDo({ menuPrincipal.borrar() })
     // assets/juego.html transmite Escape también en Wollok Game 2.1.1,
     // cuyo cliente predeterminado descarta el código de esta tecla.
     new Key(keyCodes = ["Escape"]).onPressDo({ menuPrincipal.cancelar() })
-    
+
     ajustesDelJuego.abecedario().forEach({ letra =>
       keyboard.letter(letra).onPressDo({ menuPrincipal.letra(letra) })
     })
@@ -80,7 +91,7 @@ method configurarTeclas() {
   }
 
   method configurarColisiones() {
-    game.onCollideDo(estudiante, { elemento => menuPrincipal.colisionar(elemento) })
+    game.onCollideDo(self.jugador(), { elemento => menuPrincipal.colisionar(elemento) })
   }
 
   method configurarEventosTemporales() {
@@ -88,10 +99,9 @@ method configurarTeclas() {
     game.onTick(ajustesDelJuego.intervaloDeActualizacion(), "actualizarExamen", { menuPrincipal.avanzar() })
   }
 
-
 method quitarVisuales() {
   [
-    estudiante,
+    self.jugador(),
     preguntaVisual,
     palabraArmadaVisual,
     vidasVisual,
@@ -128,7 +138,7 @@ method quitarVisuales() {
 // Se puede probar sin gráficos inyectando respuesta, jugador, pista y ajustes.
 class SesionDeJuego {
   const respuesta = respuestaActual
-  const jugador = estudiante
+  var jugador = new Promedio()
   const ajustes = ajustesDelJuego
   var pista = pistaSinConectar
   var pistaConectada = false
@@ -136,6 +146,9 @@ class SesionDeJuego {
   var modoSuspendido = modo
   var borrador = ""
   var preguntaActual = ""
+
+  method jugador() = jugador
+  method elegirPersonaje(personaje) { jugador = personaje }
 
   method conectarPista(unaPista) {
     pista = unaPista
@@ -174,7 +187,7 @@ class SesionDeJuego {
   method recogerLetra(letra) { modo.recogerLetra(self, letra) }
   method colisionarCon(elemento) { modo.colisionarCon(self, elemento, jugador) }
   method finalizarTanda() { modo.finalizarTanda(self) }
-  method activarHabilidad() { jugador.activarHabilidad() }
+  method usarHabilidad() { jugador.usarHabilidad() }
 
   method avanzarPista() { pista.avanzar(self.pasoDeTiempo()) }
   method retirarOpciones() { pista.retirarOpciones() }
@@ -241,7 +254,7 @@ class ModoDeJuego {
 
 class ModoCarriles inherits ModoDeJuego {
   override method escribir(sesion, letra) {
-    [sesion].filter({ s => letra == "F" }).forEach({ s => s.activarHabilidad() })
+    [sesion].filter({ s => letra == "F" }).forEach({ s => s.usarHabilidad() })
   }
   override method mover(sesion, accion) { accion.apply() }
   override method confirmar(sesion) { sesion.abrirRespuesta() }
@@ -321,6 +334,12 @@ class ModoResuelto inherits ModoDeJuego {
 }
 
 class ModoSinVidas inherits ModoResuelto {
+  override method iniciar(sesion) {
+    super(sesion)
+    /*  *game.sound("SonidoStart.mp3").play() */
+    game.addVisual(filtroOscuro)
+    game.addVisual(pantallaDesaprobado)
+  }
   override method nombre() = "sin vidas"
   override method indicacion(sesion) = "Game Over | Enter: menu principal"
   override method corresponde(sesion, tiempo) = sesion.sinVidas()
@@ -330,7 +349,7 @@ object pistaDelJuego {
   const obstaculos = []
   const opciones = []
   var tiempoParaProximoObstaculo = 1000
-  var tiempoParaProximaAyuda =5000 
+  var tiempoParaProximaAyuda =5000
   var zonaSegura = false
 
   method agregarObstaculo(elemento) {
@@ -343,9 +362,9 @@ object pistaDelJuego {
     tiempoParaProximoObstaculo = 1000
   }
   method avanzar(milisegundos) {
-    estudiante.avanzarTiempo(milisegundos)
+    gameConfig.jugador().avanzarTiempo(milisegundos)
     obstaculos.copy().filter({ e => !game.hasVisual(e) }).forEach({ e => obstaculos.remove(e) })
-    obstaculos.forEach({ e => e.avanzar(milisegundos, estudiante.velocidadObstaculos()) })
+    obstaculos.forEach({ e => e.avanzar(milisegundos, gameConfig.velocidadObstaculos()) })
     opciones.filter({ e => game.hasVisual(e) }).forEach({ e => e.bajar() })
     [self].filter({ pista => !zonaSegura }).forEach({ pista => pista.generarDurante(milisegundos) })
   }
@@ -355,7 +374,7 @@ object pistaDelJuego {
     if (tiempoParaProximoObstaculo <= 0) {
         generadorDeObstaculos.generar()
         // Asumiendo que el estudiante conoce la dificultad actual:
-        tiempoParaProximoObstaculo = estudiante.intervaloGeneracion()
+        tiempoParaProximoObstaculo = gameConfig.intervaloGeneracion()
     }
 
     // 2. Reloj de Ayudas (Independiente)
@@ -363,7 +382,7 @@ object pistaDelJuego {
     if (tiempoParaProximaAyuda <= 0) {
         generadorDeAyudas.generarAyuda()
         // Calculamos un nuevo tiempo aleatorio basado en la dificultad
-        tiempoParaProximaAyuda = estudiante.intervaloGeneracionAyuda()
+        tiempoParaProximaAyuda = gameConfig.intervaloGeneracionAyuda()
     }
   }
   method limpiarObstaculos() {

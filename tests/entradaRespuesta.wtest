@@ -1,6 +1,6 @@
 import gameConfiguration.*
 import respuestas.*
-import estudiante.*
+
 import todasLasPreguntas.*
 import wollok.game.*
 
@@ -16,7 +16,7 @@ describe "Teclado de respuesta y errores sin penalizacion" {
   }
 
   test "Escape cancela incluso una respuesta correcta escrita sin enviarla" {
-    const vidaInicial = estudiante.concentracion()
+    const vidaInicial = gameConfig.jugador().concentracion()
     respuestaActual.agregarLetra("U")
     self.presionar("Enter")
     ["KeyU", "KeyT", "KeyN"].forEach({ tecla => self.presionar(tecla) })
@@ -26,9 +26,9 @@ describe "Teclado de respuesta y errores sin penalizacion" {
     assert.equals("U _ _", respuestaActual.textoConGuiones())
     assert.notThat(respuestaActual.estaRespondida())
     assert.equals(0, respuestaActual.puntos())
-    assert.equals(vidaInicial, estudiante.concentracion())
+    assert.equals(vidaInicial, gameConfig.jugador().concentracion())
     self.presionar("ArrowLeft")
-    assert.equals(3, estudiante.position().x())
+    assert.equals(3, gameConfig.jugador().position().x())
   }
 
   test "Reabrir despues de Escape presenta un borrador vacio" {
@@ -37,7 +37,7 @@ describe "Teclado de respuesta y errores sin penalizacion" {
     self.presionar("Escape")
     self.presionar("Enter")
     assert.equals("respondiendo", gameConfig.estado())
-    assert.that(gameConfig.textoDelPanel().contains("Escribi:  |"))
+    assert.that(gameConfig.textoDelPanel().contains("Texto:  |"))
   }
 
   test "Una tecla desconocida no se interpreta como Escape" {
@@ -45,14 +45,14 @@ describe "Teclado de respuesta y errores sin penalizacion" {
     self.presionar("KeyU")
     self.presionar("")
     assert.equals("respondiendo", gameConfig.estado())
-    assert.that(gameConfig.textoDelPanel().contains("Escribi: U |"))
+    assert.that(gameConfig.textoDelPanel().contains("Texto: U |"))
   }
 
   test "Escape fuera de la escritura no cambia la partida" {
     self.presionar("Escape")
     assert.equals("recorrido", gameConfig.estado())
     assert.equals(0, respuestaActual.puntos())
-    assert.equals(5, estudiante.concentracion())
+    assert.equals(5, gameConfig.jugador().concentracion())
   }
 
   test "Varios intentos incorrectos conservan vidas, puntos y pistas" {
@@ -63,7 +63,7 @@ describe "Teclado de respuesta y errores sin penalizacion" {
       self.presionar("Enter")
     })
     assert.equals("recorrido", gameConfig.estado())
-    assert.equals(5, estudiante.concentracion())
+    assert.equals(5, gameConfig.jugador().concentracion())
     assert.equals(0, respuestaActual.puntos())
     assert.equals("U _ _", respuestaActual.textoConGuiones())
     assert.notThat(respuestaActual.estaRespondida())
@@ -72,7 +72,7 @@ describe "Teclado de respuesta y errores sin penalizacion" {
   test "Confirmar un borrador vacio tampoco penaliza" {
     self.presionar("Enter")
     self.presionar("Enter")
-    assert.equals(5, estudiante.concentracion())
+    assert.equals(5, gameConfig.jugador().concentracion())
     assert.equals(0, respuestaActual.puntos())
     assert.notThat(respuestaActual.estaRespondida())
   }

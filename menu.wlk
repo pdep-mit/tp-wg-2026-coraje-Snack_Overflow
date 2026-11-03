@@ -1,5 +1,4 @@
 import gameConfiguration.*
-import estudiante.*
 import personajes.*
 import respuestas.*
 import todasLasPreguntas.*
@@ -31,12 +30,12 @@ object menuPrincipal {
   method nombrePantalla() = pantalla.nombre()
   method personajeElegido() = personajes.get(indicePersonaje).nombre()
   method dificultadElegida() = dificultades.get(indiceDificultad).nombre()
+  method confirmar() { pantalla.confirmar() }
+  method cancelar() { pantalla.cancelar() }
   method izquierda() { pantalla.izquierda() }
   method derecha() { pantalla.derecha() }
   method arriba() { pantalla.arriba() }
   method abajo() { pantalla.abajo() }
-  method confirmar() { pantalla.confirmar() }
-  method cancelar() { pantalla.cancelar() }
   method borrar() { pantalla.borrar() }
   method letra(letra) { pantalla.letra(letra) }
   method avanzar() { pantalla.avanzar() }
@@ -59,7 +58,7 @@ method dibujar(lineas) {
       var altura = 14
       lineas.forEach({ linea =>
           const visual = new TextoMenu(
-              contenido = linea.texto(), 
+              contenido = linea.texto(),
               altura = altura,
               color = linea.color()
           )
@@ -85,12 +84,12 @@ self.dibujar([
           new LineaMenu(texto = ""),
           new LineaMenu(texto = "Izquierda / Derecha: elegir personaje"),
           new LineaMenu(texto = "Arriba / Abajo: elegir dificultad"),
-          new LineaMenu(texto = "Enter: jugar | H: instrucciones", color = "00FF00FF") 
+          new LineaMenu(texto = "Enter: jugar | H: instrucciones", color = "00FF00FF")
       ])
   }
 method mostrarAyuda() {
-      pantalla = new PantallaAyuda()
-      self.dibujar([
+    pantalla = new PantallaAyuda()
+    self.dibujar([
           new LineaMenu(texto = "COMO JUGAR", color = "FF00A6FF"), // Rosa Danganronpa para el título
           new LineaMenu(texto = "Esquiva distracciones y responde la pregunta.", color = "00FFFFFF"),
           new LineaMenu(texto = "Cada 30 s hay una zona sin obstaculos.", color = "00FFFFFF"),
@@ -111,7 +110,7 @@ method mostrarAyuda() {
   }
   method iniciarPartida() {
     self.limpiar()
-    estudiante.elegir(personajes.get(indicePersonaje).crear(), dificultades.get(indiceDificultad))
+    gameConfig.elegirPersonaje(personajes.get(indicePersonaje).crear(), dificultades.get(indiceDificultad))
     respuestaActual.reiniciarPartida()
     pistaDelJuego.reiniciar()
     gameConfig.agregarVisuales()
@@ -136,11 +135,7 @@ class LineaMenu {
 }
 
 class Pantalla {
-  method nombre() = "pantalla"
-  method izquierda() {}
-  method derecha() {}
-  method arriba() {}
-  method abajo() {}
+  method nombre()
   method confirmar() {}
   method cancelar() {}
   method borrar() {}
@@ -148,7 +143,18 @@ class Pantalla {
   method avanzar() {}
   method colisionar(elemento) {}
 }
-class PantallaMenu inherits Pantalla {
+/* * Se tiene que hacer la clase de PantallaConFlechas ya que 
+    * El gameConfig siempre va a mandar los comandos de movimiento aca
+    :) */
+
+class PantallaConFlechas inherits Pantalla {
+  method izquierda() {}
+  method derecha() {}
+  method arriba() {}
+  method abajo() {}
+}
+
+class PantallaMenu inherits PantallaConFlechas {
   override method nombre() = "menu"
   override method izquierda() { menuPrincipal.cambiarPersonaje(-1) }
   override method derecha() { menuPrincipal.cambiarPersonaje(1) }
@@ -159,12 +165,12 @@ class PantallaMenu inherits Pantalla {
     [menuPrincipal].filter({ menu => letra == "H" }).forEach({ menu => menu.mostrarAyuda() })
   }
 }
-class PantallaAyuda inherits Pantalla {
+class PantallaAyuda inherits PantallaConFlechas {
   override method nombre() = "ayuda"
   override method confirmar() { menuPrincipal.mostrar() }
   override method cancelar() { menuPrincipal.mostrar() }
 }
-class PantallaPartida inherits Pantalla {
+class PantallaPartida inherits PantallaConFlechas {
   override method nombre() = "partida"
   override method izquierda() { gameConfig.moverIzquierda() }
   override method derecha() { gameConfig.moverDerecha() }

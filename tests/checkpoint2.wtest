@@ -1,5 +1,5 @@
 import personajes.*
-import estudiante.*
+
 import respuestas.*
 import distracciones.*
 import letras.*
@@ -24,12 +24,12 @@ describe "Personajes del segundo checkpoint" {
     const alumno = new Violento()
     const respuesta = new Respuesta()
     respuesta.setearRespuestaEsperada(["U", "T", "N"])
-    alumno.activarHabilidad()
-    alumno.activarHabilidad()
+    alumno.usarHabilidad()
+    alumno.usarHabilidad()
     respuesta.agregarLetra(alumno.letraElegida("X", respuesta))
     assert.equals("U", respuesta.palabraArmada())
     assert.notThat(alumno.tieneSuerte())
-    alumno.activarHabilidad()
+    alumno.usarHabilidad()
     respuesta.agregarLetra(alumno.letraElegida("X", respuesta))
     assert.equals("U", respuesta.palabraArmada())
     assert.equals(0, respuesta.puntos())
@@ -37,21 +37,21 @@ describe "Personajes del segundo checkpoint" {
   }
   test "Enfoque protege 5000 ms y repetir F no extiende el escudo" {
     const alumno = new Brillante()
-    alumno.activarHabilidad()
+    alumno.usarHabilidad()
     alumno.avanzarTiempo(4999)
     alumno.perderConcentracion()
     assert.equals(5, alumno.concentracion())
-    alumno.activarHabilidad()
+    alumno.usarHabilidad()
     alumno.avanzarTiempo(1)
     alumno.perderConcentracion()
     assert.equals(4, alumno.concentracion())
-    alumno.activarHabilidad()
+    alumno.usarHabilidad()
     assert.notThat(alumno.tieneEscudo())
   }
   test "Promedio no activa ninguna habilidad" {
     const alumno = new Promedio()
-    alumno.activarHabilidad()
-    assert.notThat(alumno.tieneSuerte())
+    alumno.usarHabilidad()
+
     assert.notThat(alumno.tieneEscudo())
     alumno.perderConcentracion()
     assert.equals(4, alumno.concentracion())
@@ -66,21 +66,21 @@ describe "Personajes del segundo checkpoint" {
     assert.equals([4, 5, 7], alturas)
   }
   test "Dificultad modifica velocidad y frecuencia sin cambiar el danio" {
-    estudiante.elegir(new Violento(), facil)
-    const velocidadFacil = estudiante.velocidadObstaculos()
-    const esperaFacil = estudiante.intervaloGeneracion()
-    estudiante.elegir(new Violento(), dificil)
-    assert.that(estudiante.velocidadObstaculos() > velocidadFacil)
-    assert.that(estudiante.intervaloGeneracion() < esperaFacil)
-    estudiante.perderConcentracion()
-    assert.equals(3, estudiante.concentracion())
+    gameConfig.elegirPersonaje(new Violento(), facil)
+    const velocidadFacil = gameConfig.velocidadObstaculos()
+    const esperaFacil = gameConfig.intervaloGeneracion()
+    gameConfig.elegirPersonaje(new Violento(), dificil)
+    assert.that(gameConfig.velocidadObstaculos() > velocidadFacil)
+    assert.that(gameConfig.intervaloGeneracion() < esperaFacil)
+    gameConfig.jugador().perderConcentracion()
+    assert.equals(3, gameConfig.jugador().concentracion())
   }
   test "La colision fisica aplica Suerte y resuelve sin puntos" {
-    estudiante.elegir(new Violento(), normal)
+    gameConfig.elegirPersonaje(new Violento(), normal)
     respuestaActual.setearRespuestaEsperada(["A"])
-    estudiante.activarHabilidad()
+    gameConfig.jugador().usarHabilidad()
     const letra = new LetraFisica(caracter = "X", position = game.at(5, 1))
-    letra.serChocadoPor(estudiante)
+    letra.serChocadoPor(gameConfig.jugador())
     assert.that(respuestaActual.estaRespondida())
     assert.equals("A", respuestaActual.palabraArmada())
     assert.equals(0, respuestaActual.puntos())
@@ -105,11 +105,11 @@ describe "Menu y teclado integrados" {
   test "El menu no mueve al estudiante ni avanza la partida" {
     self.presionar("ArrowLeft")
     assert.equals("Brillante", menuPrincipal.personajeElegido())
-    assert.equals(5, estudiante.position().x())
-    assert.notThat(game.hasVisual(estudiante))
+    assert.equals(5, gameConfig.jugador().position().x())
+    assert.notThat(game.hasVisual(gameConfig.jugador()))
     (1..200).forEach({ paso => menuPrincipal.avanzar() })
     assert.equals("menu", menuPrincipal.nombrePantalla())
-    assert.equals(5, estudiante.concentracion())
+    assert.equals(5, gameConfig.jugador().concentracion())
   }
   test "La ayuda regresa al menu conservando la seleccion" {
     self.presionar("ArrowRight")
@@ -121,35 +121,35 @@ describe "Menu y teclado integrados" {
     assert.equals("Violento", menuPrincipal.personajeElegido())
     assert.equals("Dificil", menuPrincipal.dificultadElegida())
     self.presionar("Enter")
-    assert.equals("Violento", estudiante.nombre())
-    assert.equals("Dificil", estudiante.dificultad())
-    assert.that(game.hasVisual(estudiante))
+    assert.equals("Violento", gameConfig.jugador().nombre())
+    assert.equals("Dificil", gameConfig.dificultad())
+    assert.that(game.hasVisual(gameConfig.jugador()))
   }
   test "F en escritura escribe una letra sin gastar la habilidad" {
     self.elegirBrillante()
     self.presionar("Enter")
     self.presionar("KeyF")
-    assert.notThat(estudiante.habilidadUsada())
-    assert.that(gameConfig.textoDelPanel().contains("Escribi: F |"))
+    assert.notThat(gameConfig.jugador().habilidadUsada())
+    assert.that(gameConfig.textoDelPanel().contains("Texto: F |"))
     self.presionar("Escape")
     self.presionar("KeyF")
-    assert.that(estudiante.tieneEscudo())
+    assert.that(gameConfig.jugador().tieneEscudo())
   }
   test "El reloj del escudo se pausa durante la escritura" {
     self.elegirBrillante()
     self.presionar("KeyF")
     self.presionar("Enter")
     (1..100).forEach({ paso => menuPrincipal.avanzar() })
-    assert.that(estudiante.tieneEscudo())
+    assert.that(gameConfig.jugador().tieneEscudo())
     self.presionar("Escape")
     (1..25).forEach({ paso => menuPrincipal.avanzar() })
-    assert.notThat(estudiante.tieneEscudo())
+    assert.notThat(gameConfig.jugador().tieneEscudo())
   }
   test "Volver al menu y jugar reinicia vidas, puntos y habilidad" {
     self.elegirBrillante()
     self.presionar("KeyF")
-    estudiante.avanzarTiempo(5000)
-    estudiante.perderConcentracion()
+    gameConfig.jugador().avanzarTiempo(5000)
+    gameConfig.jugador().perderConcentracion()
     gameConfig.cargarPregunta(new Pregunta(enunciado = "Letra", letras = ["A"]))
     self.presionar("Enter")
     self.presionar("KeyA")
@@ -158,10 +158,10 @@ describe "Menu y teclado integrados" {
     self.presionar("Enter")
     assert.equals("menu", menuPrincipal.nombrePantalla())
     self.presionar("Enter")
-    assert.equals(5, estudiante.concentracion())
+    assert.equals(5, gameConfig.jugador().concentracion())
     assert.equals(0, respuestaActual.puntos())
-    assert.notThat(estudiante.habilidadUsada())
-    assert.equals("Brillante", estudiante.nombre())
+    assert.notThat(gameConfig.jugador().habilidadUsada())
+    assert.equals("Brillante", gameConfig.jugador().nombre())
   }
 }
 
@@ -180,22 +180,22 @@ describe "Pista conectada a las zonas seguras" {
     gameConfig.avanzar()
     assert.equals("zona segura", gameConfig.estado())
     assert.notThat(game.hasVisual(obstaculo))
-    const letra = new LetraFisica(caracter = "U", position = estudiante.position())
+    const letra = new LetraFisica(caracter = "U", position = gameConfig.jugador().position())
     gameConfig.colisionarCon(letra)
     assert.equals("recorrido", gameConfig.estado())
     assert.equals("U _ _", respuestaActual.textoConGuiones())
   }
   test "Enter vuelve al menu despues de perder y permite una nueva partida" {
-    estudiante.elegir(new Violento(), normal)
+    gameConfig.elegirPersonaje(new Violento(), normal)
     (1..3).forEach({ golpe =>
-      gameConfig.colisionarCon(new Obstaculo(image = "celular.png", position = estudiante.position()))
+      gameConfig.colisionarCon(new Obstaculo(image = "celular.png", position = gameConfig.jugador().position()))
     })
     assert.equals("sin vidas", gameConfig.estado())
     io.queueEvent("keypress", "Enter")
     game.flushEvents(game.currentTime() + 1)
     assert.equals("menu", menuPrincipal.nombrePantalla())
     menuPrincipal.iniciarPartida()
-    assert.equals(5, estudiante.concentracion())
+    assert.equals(5, gameConfig.jugador().concentracion())
     assert.equals("recorrido", gameConfig.estado())
   }
 }
@@ -213,7 +213,7 @@ test "El menu conserva sus textos y permite jugar con el motor ya iniciado" {
   assert.that(game.allVisuals().map({ visual => visual.text() }).contains("COMO JUGAR"))
   menuPrincipal.mostrar()
   menuPrincipal.iniciarPartida()
-  assert.that(game.hasVisual(estudiante))
+  assert.that(game.hasVisual(gameConfig.jugador()))
   assert.equals("partida", menuPrincipal.nombrePantalla())
   assert.equals(11, game.width())
   assert.equals(16, game.height())

@@ -1,0 +1,57 @@
+import gameConfiguration.*
+import menu.*
+import personajes.*
+import ayudas.*
+import distracciones.*
+import wollok.game.*
+
+test "Apuntes protege a los tres personajes sin requerir una habilidad propia" {
+  const alumnos = [new Promedio(), new Violento(), new Brillante()]
+  alumnos.forEach({ alumno =>
+    new Apuntes().serChocadoPor(alumno)
+    alumno.perderConcentracion()
+    assert.equals(5, alumno.concentracion())
+    alumno.avanzarTiempo(5000)
+    alumno.perderConcentracion()
+  })
+  assert.equals([4, 3, 4], alumnos.map({ alumno => alumno.concentracion() }))
+}
+
+test "El visual y las colisiones pertenecen a la instancia elegida y no al jugador anterior" {
+  gameConfig.configurarTodo()
+  const anterior = gameConfig.jugador()
+  const elegido = new Violento()
+  gameConfig.elegirPersonaje(elegido, normal)
+  gameConfig.agregarVisuales()
+  assert.equals(elegido, gameConfig.jugador())
+  assert.that(game.hasVisual(elegido))
+  assert.notThat(game.hasVisual(anterior))
+  const distraccion = new Obstaculo(image = "celular.png", position = elegido.position())
+  game.addVisual(distraccion)
+  game.start()
+  game.flushEvents(game.currentTime() + 1)
+  assert.equals(3, elegido.concentracion())
+  assert.equals(5, anterior.concentracion())
+  assert.notThat(game.hasVisual(distraccion))
+}
+
+test "Las flechas seleccionan en menu, no actuan en ayuda y mueven en partida" {
+  gameConfig.configurarTodo()
+  menuPrincipal.mostrar()
+  game.start()
+  io.queueEvent("keypress", "ArrowRight")
+  game.flushEvents(game.currentTime() + 1)
+  assert.equals("Violento", menuPrincipal.personajeElegido())
+  menuPrincipal.mostrarAyuda()
+  io.queueEvent("keypress", "ArrowRight")
+  io.queueEvent("keypress", "ArrowDown")
+  game.flushEvents(game.currentTime() + 1)
+  assert.equals("Violento", menuPrincipal.personajeElegido())
+  assert.equals("Normal", menuPrincipal.dificultadElegida())
+  menuPrincipal.mostrar()
+  menuPrincipal.iniciarPartida()
+  io.queueEvent("keypress", "ArrowLeft")
+  game.flushEvents(game.currentTime() + 1)
+  assert.equals(3, gameConfig.jugador().position().x())
+  assert.equals("Violento", menuPrincipal.personajeElegido())
+}

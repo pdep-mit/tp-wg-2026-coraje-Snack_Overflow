@@ -1,80 +1,83 @@
-# Explicaciones teóricas — Checkpoint 2
+# Diseño orientado a objetos — Checkpoint 2
 
-## Herencia y estado encapsulado
+## Un personaje, una instancia
 
-`Personajes` (`personajes.wlk`) concentra carril, concentración, velocidad base de
-obstáculos, uso de habilidad, protección y elección de letras. Sus atributos son
-privados. `Promedio`, `Violento` y `Brillante` heredan movimiento y recuperación.
-Violento redefine daño y habilidad; Brillante redefine habilidad. Cada subclase
-configura la velocidad heredada. Se crean instancias nuevas al comenzar una partida.
+`Personajes` es la superclase abstracta de `Promedio`, `Violento` y `Brillante`.
+Contiene carril, vidas, velocidad y protección. Cada subclase debe definir
+`nombre()`, `danioPorDistraccion()` y `usarHabilidad()`.
 
-`estudiante` conserva la identidad registrada en Wollok Game y delega en el personaje
-elegido: no pregunta si es Violento o Brillante. Además combina su velocidad con
-la dificultad, y conserva la presentación de derrota existente.
+El antiguo objeto `estudiante` fue eliminado: duplicaba la interfaz del personaje
+mediante delegaciones. `SesionDeJuego` conserva directamente la instancia elegida.
+`gameConfig.jugador()` permite consultarla desde los visuales y la pista.
+El jugador dibujado, el receptor de colisiones y el dueño de las vidas son el
+mismo objeto. Al elegir otro personaje se retira el visual anterior y se elimina
+su manejador de colisiones antes de registrar el nuevo.
 
-## Polimorfismo
+La dificultad pertenece a la configuración de la partida. La presentación de
+Game Over pertenece al modo sin vidas, no al personaje.
 
-- Todos los personajes reciben `activarHabilidad()`. Promedio no hace nada;
-  Violento activa Suerte y Brillante activa Enfoque.
-- `vulnerable` y `Escudo` entienden `recibirGolpe(personaje)` y `avanzar(ms, personaje)`.
-  La protección decide si aplica daño, sin condicionales por tipo de personaje.
-- `eleccionNormal` y `eleccionConSuerte` entienden `elegir(letra, respuesta, personaje)`.
-  Suerte devuelve la siguiente letra esperada y se consume.
-- Los elementos siguen recibiendo `serChocadoPor(estudiante)`: cada uno aplica su efecto.
-- `PantallaMenu`, `PantallaAyuda` y `PantallaPartida` atienden el mismo protocolo de
-  teclado. En partida, los modos existentes separan recorrido, zona segura,
-  escritura y final. F escribe normalmente en el modo de escritura.
-- Los carriles conservan el polimorfismo de límites: el vecino del borde es él mismo.
+## Habilidades en las subclases
 
-## Tiempo y dificultad
+El único método de habilidad declarado en `Personajes` es `usarHabilidad()`:
 
-La velocidad se expresa en celdas por segundo. Promedio: 2.5; Violento: 3.33;
-Brillante: 1.67. Fácil multiplica por 0.75, Normal por 1 y Difícil por 1.25.
-La frecuencia de generación usa `1400 / factor` milisegundos.
-Cada obstáculo acumula el desplazamiento y baja una celda al completar una unidad;
-con el tick de 200 ms y estas velocidades nunca salta una celda de colisión.
+- `Promedio` lo implementa sin efecto. No tiene variables de habilidad utilizada
+  ni métodos para consultar Suerte.
+- `Violento` administra su uso único y la letra asegurada. Solo esta clase entiende
+  `tieneSuerte()`, `consumirSuerte()` y `letraElegida(...)`.
+- `Brillante` administra el uso único de Enfoque y activa la protección común.
 
-La sesión tiene un solo reloj. Menú, ayuda, escritura y fin no avanzan la pista
-ni el escudo. Enfoque dura 5000 ms de juego activo. Las habilidades se usan **una
-vez por partida**, sin recarga. Suerte espera la siguiente letra física; se
-consume aunque esa letra ya fuera la correcta. Una nueva partida restablece todo.
+Los textos de habilidad los implementa cada subclase. La base no decide cuáles
+estados de habilidad existen ni conoce sus nombres.
 
-Durante 30 segundos hay distracciones. Luego se limpian y aparecen tres opciones
-en una zona segura de hasta 5 segundos. Elegir una consume la tanda. Las letras
-incorrectas se ignoran; las respuestas escritas incorrectas tampoco penalizan.
-Completar las letras resuelve sin puntos; acertar por escrito da 100 por letra.
+Todas las letras envían `recogerLetra(letra, respuesta)` al personaje. La base
+entrega la letra a la respuesta; Violento redefine ese mensaje para aplicar
+Suerte antes de entregarla. No se consulta el tipo del personaje.
 
-## Diagrama de clases y colaboraciones
+## Por qué el escudo sí es común
+
+Apuntes puede dar un escudo a cualquiera de los tres personajes. Por eso
+`activarEscudo()`, `tieneEscudo()` y el avance de su duración permanecen en la
+superclase. El escudo recibido como ayuda no consume la habilidad propia.
+`vulnerable` y `Escudo` deciden polimórficamente si un golpe descuenta vida.
+
+## Pantallas y controles
+
+`Pantalla` no declara mensajes para las flechas. `PantallaMenu` implementa las
+cuatro direcciones, mientras que `PantallaPartida` solo implementa izquierda y
+derecha. `PantallaAyuda` hereda directamente de `Pantalla` y no recibe mensajes
+de movimiento. `menuPrincipal` despacha las flechas según la pantalla activa:
+
+- En el menú cambian personaje y dificultad.
+- En la ayuda no producen efectos.
+- En partida cambian de carril mediante la sesión, que los ignora al escribir
+  una respuesta o cuando termina la partida.
+
+Los manejadores de teclado se registran una vez y envían las flechas a
+`menuPrincipal`, que solo reenvía cada dirección a las pantallas que la manejan.
+
+## Diagrama
 
 ```mermaid
 classDiagram
   Personajes <|-- Promedio
   Personajes <|-- Violento
   Personajes <|-- Brillante
-  estudiante --> Personajes : delega
-  estudiante --> Dificultad : combina velocidad
-  Personajes --> Escudo : proteccion temporal
-  Personajes --> eleccionConSuerte : proxima letra
-  menuPrincipal --> OpcionPersonaje : crea instancia
-  menuPrincipal --> Pantalla : delega eventos
+  Personajes --> Escudo : proteccion por ayudas
+  Violento --> eleccionConSuerte
+  SesionDeJuego --> Personajes : jugador elegido
+  gameConfig --> SesionDeJuego
+  gameConfig --> Dificultad
+  menuPrincipal --> Pantalla
   Pantalla <|-- PantallaMenu
   Pantalla <|-- PantallaAyuda
   Pantalla <|-- PantallaPartida
-  PantallaPartida --> SesionDeJuego
-  SesionDeJuego --> ModoDeJuego
-  SesionDeJuego --> pistaDelJuego
-  pistaDelJuego --> Obstaculo : avanzar
-  LetraFisica --> estudiante : letraElegida
-  LetraFisica --> Respuesta : agregarLetra
 ```
 
-## Validación
+## Verificación
 
-`tests/checkpoint2.wtest` cubre daño polimórfico, vidas no negativas, uso único,
-consumo de Suerte, duración exacta del escudo, velocidades, dificultad, colisiones,
-ayuda, selección, F durante escritura, pausa y reinicio. Se conservan los tests
-de movimiento, colisiones y respuestas del primer checkpoint.
+Los tests comprueban escudo para todos los personajes, uso único, letras,
+reinicio, teclado con el motor iniciado y colisiones sobre la instancia elegida.
 
-Los tres personajes reutilizan `assets/estudiante.png`; la elección y el estado
-de la habilidad se identifican por texto. Café y apuntes conservan su protocolo
-de colisión, pero no se generan durante este ciclo; aún faltan sus imágenes.
+Persiste el fallo de dificultad ya detectado: la velocidad se multiplica por
+1.5 en Fácil y por 0.75 en Difícil, mientras el test espera el orden inverso.
+Esta reorganización conserva los factores actuales.

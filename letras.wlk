@@ -13,7 +13,7 @@ class LetraFisica {
   // --- Interacciones (Polimorfismo CP1) ---
   method serChocadoPor(unEstudiante) {
     // Le mandamos el mensaje a respuestaActual delegando la validación
-    respuestaActual.agregarLetra(unEstudiante.letraElegida(caracter, respuestaActual))
+    unEstudiante.recogerLetra(caracter, respuestaActual)
     gameConfig.finalizarTanda()
 
     // Removemos esta letra del tablero

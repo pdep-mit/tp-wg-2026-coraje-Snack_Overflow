@@ -1,4 +1,5 @@
-import estudiante.*
+import gameConfiguration.*
+
 import letras.*
 import respuestas.* // ¡Cambiar por tu nombre actual!
 import wollok.game.*
@@ -8,44 +9,42 @@ describe "Pruebas de colisión con Letras Físicas" {
     // Configuramos una respuesta de prueba antes de cada test
     respuestaActual.setearRespuestaEsperada(["U", "T", "N"])
   }
-  
+
   test "Chocar con la letra física CORRECTA la delega a la respuesta y no resta vida" {
-    const vidaInicial = estudiante.concentracion()
-    
-    
+    const vidaInicial = gameConfig.jugador().concentracion()
+
     // Instanciamos la letra correcta ("U") en una posición cualquiera
     const letraCorrecta = new LetraFisica(
       caracter = "U",
       position = game.at(5, 5)
     )
-    
+
     // Simulamos la colisión
-    letraCorrecta.serChocadoPor(estudiante)
-    
+    letraCorrecta.serChocadoPor(gameConfig.jugador())
+
     // Verificamos que la letra física le avisó correctamente a 'respuestaActual'
     assert.equals("U", respuestaActual.palabraArmada())
-    
+
     // Verificamos que el estudiante sigue intacto
-    assert.equals(vidaInicial, estudiante.concentracion())
+    assert.equals(vidaInicial, gameConfig.jugador().concentracion())
   }
-  
+
   test "Chocar con la letra física INCORRECTA la descarta sin restar vida" {
-    const vidaInicial = estudiante.concentracion()
-    
-    
+    const vidaInicial = gameConfig.jugador().concentracion()
+
     // Instanciamos una letra incorrecta ("X")
     const letraIncorrecta = new LetraFisica(
       caracter = "X",
       position = game.at(5, 5)
     )
-    
+
     // Simulamos la colisión
-    letraIncorrecta.serChocadoPor(estudiante)
-    
+    letraIncorrecta.serChocadoPor(gameConfig.jugador())
+
     // Verificamos que la palabra sigue vacía (se rechazó)
     assert.equals("", respuestaActual.palabraArmada())
-    
-    // Una letra incorrecta no modifica las vidas del estudiante.
-    assert.equals(vidaInicial, estudiante.concentracion())
+
+    // Una letra incorrecta no modifica las vidas del gameConfig.jugador().
+    assert.equals(vidaInicial, gameConfig.jugador().concentracion())
   }
 }

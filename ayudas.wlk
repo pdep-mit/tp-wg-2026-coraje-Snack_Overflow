@@ -1,8 +1,7 @@
 //Aca se pondran todos los object que le den una ayuda al estudiante al interactuar con ella
-import estudiante.*
 import wollok.game.*
 import respuestas.*
-import distracciones.*
+import ObjetoJuego.*
 class Cafe inherits ObjetoJuego(image = "cafe.png") {
   
   override method serChocadoPor(unEstudiante) {
@@ -21,7 +20,7 @@ class Apuntes inherits ObjetoJuego(image = "apuntes.png") {
 
 class AyudaClaude inherits ObjetoJuego(image = "claude.png") {
   override method serChocadoPor(unEstudiante) {
-    respuestaActual.completarLetraComodin() 
+    respuestaActual.completarLetraComodin()
     game.removeVisual(self)
   }
 

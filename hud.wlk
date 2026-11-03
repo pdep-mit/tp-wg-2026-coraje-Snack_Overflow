@@ -1,4 +1,4 @@
-import estudiante.*
+
 import respuestas.*
 import gameConfiguration.*
 import wollok.game.*
@@ -16,14 +16,12 @@ object palabraArmadaVisual {
   //method text() = respuestaActual.palabraArmada()
 }
 
-
 object vidasVisual {
   method position() = game.at(6, 14)
 
   method image() =
-    "vidas_" + estudiante.concentracion().min(5).toString() + ".png"
+    "vidas_" + gameConfig.jugador().concentracion().min(5).toString() + ".png"
 }
-
 
 object pantallaDesaprobado {
   method position() = game.at(-3, 4)
@@ -41,15 +39,14 @@ object filtroOscuro {
 }
 object habilidadVisual {
   method position() = game.at(3, 14)
-  method text() = estudiante.estadoHabilidad()
+  method text() = gameConfig.jugador().estadoHabilidad()
 }
 object imagenPersonajeVisual {
   method position() = game.at(1, 13)
-  method image() = estudiante.image()
+  method image() = gameConfig.jugador().image()
 }
-
 
 object nombrePersonajeVisual {
   method position() = game.at(3, 13)
-  method text() = estudiante.nombre()
+  method text() = gameConfig.jugador().nombre()
 }
