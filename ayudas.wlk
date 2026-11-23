@@ -2,26 +2,29 @@
 import wollok.game.*
 import respuestas.*
 import ObjetoJuego.*
-class Cafe inherits ObjetoJuego(image = "cafe.png") {
-  
+class Ayuda inherits ObjetoJuego {
   override method serChocadoPor(unEstudiante) {
+    self.aplicarEfecto(unEstudiante)
+    game.removeVisual(self)
+  }
+
+  method aplicarEfecto(unEstudiante)
+}
+
+class Cafe inherits Ayuda(image = "cafe.png") {
+  override method aplicarEfecto(unEstudiante) {
     unEstudiante.recuperarConcentracion()
-    game.removeVisual(self)
   }
-
 }
 
-class Apuntes inherits ObjetoJuego(image = "apuntes.png") {
-  override  method serChocadoPor(unEstudiante) {
+class Apuntes inherits Ayuda(image = "apuntes.png") {
+  override method aplicarEfecto(unEstudiante) {
     unEstudiante.activarEscudo()
-    game.removeVisual(self)
   }
 }
 
-class AyudaClaude inherits ObjetoJuego(image = "claude.png") {
-  override method serChocadoPor(unEstudiante) {
+class AyudaClaude inherits Ayuda(image = "claude.png") {
+  override method aplicarEfecto(unEstudiante) {
     respuestaActual.completarLetraComodin()
-    game.removeVisual(self)
   }
-
 }
