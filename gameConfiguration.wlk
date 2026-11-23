@@ -14,6 +14,9 @@ object ajustesDelJuego {
   method alto() = 16
   method tamanioCelda() = 40
   method intervaloDeActualizacion() = 200
+  // Valores de referencia para la dificultad Normal.
+  method distanciaBaseEnFilas() = 4
+  method pausaAdicionalEntreObjetosMs() = 1200
   method duracionRecorrido() = 30000
   method duracionZonaSegura() = 5000
   // Premio escrito: este valor multiplicado por la longitud de la respuesta.
@@ -30,7 +33,9 @@ object gameConfig {
   method dificultad() = dificultad.nombre()
   method sesion() = sesion
   method velocidadObstaculos() = self.jugador().velocidadObstaculos() * dificultad.factor()
-  method intervaloGeneracion() = dificultad.intervaloGeneracion()
+  method intervaloGeneracion() = dificultad.intervaloGeneracion() +
+    ajustesDelJuego.pausaAdicionalEntreObjetosMs() * dificultad.factor()
+  method distanciaMinimaEntreObjetos() = ajustesDelJuego.distanciaBaseEnFilas() * dificultad.factor()
   method intervaloGeneracionAyuda() = dificultad.intervaloGeneracionAyuda()
   method elegirPersonaje(personaje, unaDificultad) {
     self.quitarVisuales()
@@ -353,20 +358,36 @@ class ModoSinVidas inherits ModoResuelto {
 }
 
 object pistaDelJuego {
+  const carriles = [carrilIzquierdo, carrilCentral, carrilDerecho]
+  const filaDeEntrada = 10
   const obstaculos = []
   const opciones = []
-  var tiempoParaProximoObstaculo = 1000
-  var tiempoParaProximaAyuda =5000
+  var tiempoParaProximoObjeto = 1000
+  var tiempoParaProximaAyuda = 5000
   var zonaSegura = false
 
   method agregarObstaculo(elemento) {
-    obstaculos.add(elemento)
-    game.addVisual(elemento)
+    if (self.hayEspacioEnFila(elemento.position().y())) {
+      self.colocarEnPista(elemento)
+    }
   }
+
+  method colocarEnPista(elemento) {
+    game.addVisual(elemento)
+    obstaculos.add(elemento)
+  }
+
+  // Medimos la distancia hasta la próxima fila de objetos en todos los carriles.
+  method hayEspacioEnFila(fila) = !obstaculos.any({ otro =>
+    game.hasVisual(otro) &&
+      (otro.position().y() - fila).abs() < gameConfig.distanciaMinimaEntreObjetos()
+  })
+
   method reiniciar() {
     self.limpiarObstaculos()
     self.retirarOpciones()
-    tiempoParaProximoObstaculo = 1000
+    tiempoParaProximoObjeto = 1000
+    tiempoParaProximaAyuda = 5000
   }
   method avanzar(milisegundos) {
     gameConfig.jugador().avanzarTiempo(milisegundos)
@@ -376,22 +397,38 @@ object pistaDelJuego {
     [self].filter({ pista => !zonaSegura }).forEach({ pista => pista.generarDurante(milisegundos) })
   }
   method generarDurante(milisegundos) {
-// 1. Reloj de Obstáculos
-    tiempoParaProximoObstaculo -= milisegundos
-    if (tiempoParaProximoObstaculo <= 0) {
-        generadorDeObstaculos.generar()
-        // Asumiendo que el estudiante conoce la dificultad actual:
-        tiempoParaProximoObstaculo = gameConfig.intervaloGeneracion()
-    }
-
-    // 2. Reloj de Ayudas 
+    tiempoParaProximoObjeto -= milisegundos
     tiempoParaProximaAyuda -= milisegundos
-    if (tiempoParaProximaAyuda <= 0) {
-        generadorDeAyudas.generarAyuda()
-        // Calculamos un nuevo tiempo aleatorio basado en la dificultad
-        tiempoParaProximaAyuda = gameConfig.intervaloGeneracionAyuda()
+
+    if (tiempoParaProximoObjeto <= 0 && self.hayEspacioEnFila(filaDeEntrada)) {
+      const disponibles = carriles.copy()
+      self.generadoresParaLaFila().forEach({ generador =>
+        const carril = disponibles.anyOne()
+        disponibles.remove(carril)
+        const elemento = generador.crear()
+        elemento.position(game.at(carril.posicionX(), filaDeEntrada))
+        self.colocarEnPista(elemento)
+      })
+      tiempoParaProximoObjeto = gameConfig.intervaloGeneracion()
     }
   }
+
+  method generadoresParaLaFila() {
+    const generadores = []
+    if (tiempoParaProximaAyuda <= 0) {
+      generadores.add(generadorDeAyudas)
+      tiempoParaProximaAyuda = gameConfig.intervaloGeneracionAyuda()
+    } else {
+      generadores.add(generadorDeObstaculos)
+    }
+
+    // Cada fila tiene un 50 % de probabilidad de sumar un segundo obstáculo.
+    if ([true, false].anyOne()) {
+      generadores.add(generadorDeObstaculos)
+    }
+    return generadores
+  }
+
   method limpiarObstaculos() {
     obstaculos.filter({ e => game.hasVisual(e) }).forEach({ e => game.removeVisual(e) })
     obstaculos.clear()
@@ -399,9 +436,8 @@ object pistaDelJuego {
   method mostrarOpciones(letras) {
     self.retirarOpciones()
     zonaSegura = true
-    const carriles = [carrilIzquierdo, carrilCentral, carrilDerecho]
     (0..2).forEach({ indice =>
-      const letra = new LetraFisica(caracter = letras.get(indice), position = game.at(carriles.get(indice).posicionX(), 10))
+      const letra = new LetraFisica(caracter = letras.get(indice), position = game.at(carriles.get(indice).posicionX(), filaDeEntrada))
       opciones.add(letra)
       game.addVisual(letra)
     })
