@@ -3,6 +3,7 @@ import personajes.*
 import respuestas.*
 import todasLasPreguntas.*
 import wollok.game.*
+import hud.*
 
 class OpcionPersonaje {
   const nombre
@@ -71,6 +72,7 @@ method dibujar(lineas) {
     gameConfig.quitarVisuales()
     pistaDelJuego.reiniciar()
     pantalla = new PantallaMenu()
+    game.addVisual(filtroOscuro)
 self.dibujar([
           // Usamos la nueva clase. Al título le damos un color, al resto nada (queda blanco).
           new LineaMenu(texto = "SNACK OVERFLOW", color = "FF00A6FF"), // Rosa Danganronpa
@@ -124,7 +126,7 @@ class TextoMenu {
   const contenido
   const altura
   const color = "FFFFFFFF"
-  method position() = game.at(ajustesDelJuego.ancho().div(2), altura)
+  method position() = game.at(5, altura)
   method text() = contenido
   method textColor() = color
 }

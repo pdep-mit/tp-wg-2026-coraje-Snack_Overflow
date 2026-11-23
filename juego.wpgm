@@ -7,3 +7,4 @@ program MinijuegoEstudiante {
   menuPrincipal.mostrar()
   game.start()
 }
+

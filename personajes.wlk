@@ -1,5 +1,6 @@
 import carriles.*
 import wollok.game.*
+import gameConfiguration.*
 
 class Personajes {
   var carrilActual = carrilCentral
@@ -19,9 +20,9 @@ class Personajes {
   method velocidadObstaculos() = velocidadObstaculos
   method estaDesconcentrado() = concentracion <= 0
   method perderConcentracion() { proteccion.recibirGolpe(self) }
-  method recibirDanio() { concentracion = (concentracion - self.danioPorDistraccion()).max(0) }
+  method recibirDanio() { concentracion = (concentracion - self.danioPorDistraccion()).max(0) musicaFondo.actualizarSegunVidas(concentracion)}
   method recuperarConcentracion() { self.recuperarConcentracion(1) }
-  method recuperarConcentracion(cantidad) { concentracion += cantidad }
+  method recuperarConcentracion(cantidad) { concentracion += cantidad musicaFondo.actualizarSegunVidas(concentracion)}
   method recogerLetra(letra, respuesta) { respuesta.agregarLetra(letra) }
 
   // Apuntes puede proteger a cualquier personaje, independientemente de su habilidad.
@@ -35,7 +36,7 @@ class Promedio inherits Personajes(velocidadObstaculos = 2.5) {
   override method nombre() = "Promedio"
   override method danioPorDistraccion() = 1
   override method usarHabilidad() {}
-  method estadoHabilidad() = "Promedio | Sin habilidad"
+  method estadoHabilidad() = "Ninguna"
 }
 
 class Violento inherits Personajes(velocidadObstaculos = 3.33) {

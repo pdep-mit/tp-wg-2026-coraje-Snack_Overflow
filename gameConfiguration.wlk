@@ -10,7 +10,7 @@ import wollok.game.*
 object ajustesDelJuego {
   method titulo() = "Snack Overflow - Examen a la carrera"
   // Los carriles existentes (3, 5 y 7) quedan centrados en este tablero.
-  method ancho() = 11
+  method ancho() = 12
   method alto() = 16
   method tamanioCelda() = 40
   method intervaloDeActualizacion() = 200
@@ -28,6 +28,7 @@ object gameConfig {
 
   method jugador() = sesion.jugador()
   method dificultad() = dificultad.nombre()
+  method sesion() = sesion
   method velocidadObstaculos() = self.jugador().velocidadObstaculos() * dificultad.factor()
   method intervaloGeneracion() = dificultad.intervaloGeneracion()
   method intervaloGeneracionAyuda() = dificultad.intervaloGeneracionAyuda()
@@ -46,6 +47,7 @@ object gameConfig {
     self.configurarTeclas()
     self.configurarColisiones()
     self.configurarEventosTemporales()
+    musicaFondo.iniciarPartida()
   }
 
   method configurarTablero() {
@@ -64,6 +66,7 @@ method agregarVisuales() {
     vidasVisual,
     habilidadVisual,
     imagenPersonajeVisual,
+    rolPersonajeVisual,
     nombrePersonajeVisual,
     panelDeRespuesta,
     resultadoVisual,
@@ -107,6 +110,7 @@ method quitarVisuales() {
     vidasVisual,
     habilidadVisual,
     imagenPersonajeVisual,
+    rolPersonajeVisual,
     nombrePersonajeVisual,
     panelDeRespuesta,
     resultadoVisual,
@@ -149,6 +153,7 @@ class SesionDeJuego {
 
   method jugador() = jugador
   method elegirPersonaje(personaje) { jugador = personaje }
+  method modoActual() = modo
 
   method conectarPista(unaPista) {
     pista = unaPista
@@ -250,6 +255,7 @@ class ModoDeJuego {
   method recogerLetra(sesion, letra) {}
   method colisionarCon(sesion, elemento, jugador) {}
   method finalizarTanda(sesion) {}
+  method textColor() = "FFFFFFFF"
 }
 
 class ModoCarriles inherits ModoDeJuego {
@@ -268,7 +274,7 @@ class ModoRecorrido inherits ModoCarriles {
   var transcurrido = 0
   override method nombre() = "recorrido"
   override method indicacion(sesion) =
-  "Flechas: moverse | Enter: escribir"
+  "Teclas:Flechas=moverse | Enter=pausar | F=Habilidad"
 
   override method iniciar(sesion) {
     sesion.retirarOpciones()
@@ -309,9 +315,9 @@ class FinDeZona inherits ModoDeJuego {
 object continuarModo inherits ModoDeJuego {}
 
 class ModoEscritura inherits ModoDeJuego {
-  override method nombre() = "respondiendo"
-  override method indicacion(sesion) =
-  "Texto: " + sesion.borrador() + " | Enter: enviar | Esc: volver"
+  override method nombre() = "EN PAUSA"
+  override method textColor() = "00FF00FF"
+  //override method indicacion(sesion) = "Texto: " + sesion.borrador() + " | Enter: enviar | Esc: volver"
 
   override method escribir(sesion, letra) { sesion.agregarAlBorrador(letra) }
   override method borrar(sesion) { sesion.borrarDelBorrador() }
@@ -336,7 +342,8 @@ class ModoResuelto inherits ModoDeJuego {
 class ModoSinVidas inherits ModoResuelto {
   override method iniciar(sesion) {
     super(sesion)
-    /*  *game.sound("SonidoStart.mp3").play() */
+    musicaFondo.detener()
+    game.sound("you-died-dark-souls.mp3").play() 
     game.addVisual(filtroOscuro)
     game.addVisual(pantallaDesaprobado)
   }
@@ -377,7 +384,7 @@ object pistaDelJuego {
         tiempoParaProximoObstaculo = gameConfig.intervaloGeneracion()
     }
 
-    // 2. Reloj de Ayudas (Independiente)
+    // 2. Reloj de Ayudas 
     tiempoParaProximaAyuda -= milisegundos
     if (tiempoParaProximaAyuda <= 0) {
         generadorDeAyudas.generarAyuda()
@@ -405,6 +412,59 @@ object pistaDelJuego {
     zonaSegura = false
   }
 }
+
+object musicaFondo {
+  const archivoNormal = "TemaInicial.mp3"
+  const archivoUltimaVida = "1ps!.mp3" 
+
+  var sonidoActual = null
+  var ultimaVidaActiva = false
+
+  method iniciarPartida() {
+    self.detener()
+    ultimaVidaActiva = false
+    sonidoActual = self.crearYReproducir(archivoNormal, 0.25)
+  }
+
+  method actualizarSegunVidas(cantidadVidas) {
+    try {
+      const debeSonarUltimaVida = cantidadVidas == 1
+      if (debeSonarUltimaVida != ultimaVidaActiva || sonidoActual == null) {
+        ultimaVidaActiva = debeSonarUltimaVida
+        self.detener()
+        if (ultimaVidaActiva) {
+          sonidoActual = self.crearYReproducir(archivoUltimaVida, 0.3)
+        } else {
+          sonidoActual = self.crearYReproducir(archivoNormal, 0.25)
+        }
+      }
+    } catch e : Exception {
+    }
+  }
+
+  method crearYReproducir(nombreArchivo, vol) {
+    try {
+      const nuevoSonido = game.sound(nombreArchivo)
+      nuevoSonido.shouldLoop(true)
+      nuevoSonido.volume(vol)
+      nuevoSonido.play()
+      return nuevoSonido
+    } catch e : Exception {
+      return null
+    }
+  }
+
+  method detener() {
+    try {
+      if (sonidoActual != null) {
+        sonidoActual.pause()
+        sonidoActual = null
+      }
+    } catch e : Exception {
+    }
+  }
+}
+
 // Adaptador vacío hasta que el equipo conecte generadores y movimiento.
 object pistaSinConectar {
   method avanzar(milisegundos) {}
@@ -414,16 +474,17 @@ object pistaSinConectar {
 }
 
 object panelDeRespuesta {
-  method position() = game.at(ajustesDelJuego.ancho().div(2), 12)
+  method position() = game.at(5, 13)
   method text() = gameConfig.textoDelPanel()
+  method textColor() = gameConfig.sesion().modoActual().textColor()
 }
 
 object resultadoVisual {
-  method position() = game.at(3, 11)
+  method position() = game.at(2, 14)
   method text() = respuestaActual.mensaje()
 }
 
 object puntajeVisual {
-  method position() = game.at(1, 0)
+  method position() = game.at(11, 0)
   method text() = "Puntos: " + respuestaActual.puntos().toString()
 }

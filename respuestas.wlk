@@ -83,7 +83,7 @@ class Respuesta {
   }
 
   method registrarRespuestaIncorrecta() {
-    mensaje = "Respuesta incorrecta. Podes volver a intentar."
+    //mensaje = "Respuesta incorrecta. Podes volver a intentar."
   }
 
 method completarLetraComodin() {
@@ -100,6 +100,7 @@ object respuestaActual inherits Respuesta {}
 object letraAceptada {
   method corresponde(respuesta, letra) = respuesta.aceptaLetra(letra)
   method aplicar(respuesta, letra) {
+    game.sound("LetraCorrecta.mp3").play()
     respuesta.registrarLetra(letra)
     return true
   }
@@ -108,6 +109,7 @@ object letraAceptada {
 object letraIgnorada {
   method corresponde(respuesta, letra) = true
  method aplicar(respuesta, letra) {
+  game.sound("LetraErronea.mp3").play()
     // Una letra incorrecta conserva el progreso y las vidas.
     // Se ignora sin penalizacion.
     return false
