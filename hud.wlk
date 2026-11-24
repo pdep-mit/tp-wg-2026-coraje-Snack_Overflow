@@ -32,6 +32,7 @@ object filtroOscuro {
     // Lo anclamos abajo a la izquierda
     method position() = game.origin()
     method image() = "filtro_oscuro.png"
+    method text() = ""
 }
 object habilidadVisual {
   method position() = game.at(2, 0)

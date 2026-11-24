@@ -6,44 +6,49 @@ class Personajes {
   var carrilActual = carrilCentral
   var concentracion = 5
   var proteccion = vulnerable
-  const velocidadObstaculos
 
   method nombre()
   method danioPorDistraccion()
   method usarHabilidad()
+  method velocidadObstaculos()
+  method estadoHabilidad()
 
   method image() = "estudiante.png"
   method position() = game.at(carrilActual.posicionX(), 1)
   method moverIzquierda() { carrilActual = carrilActual.izquierda() }
   method moverDerecha() { carrilActual = carrilActual.derecha() }
+  
   method concentracion() = concentracion
-  method velocidadObstaculos() = velocidadObstaculos
   method estaDesconcentrado() = concentracion <= 0
   method perderConcentracion() { proteccion.recibirGolpe(self) }
-  method recibirDanio() { concentracion = (concentracion - self.danioPorDistraccion()).max(0) musicaFondo.actualizarSegunVidas(concentracion)}
-  method recuperarConcentracion() { self.recuperarConcentracion(1) }
-  method recuperarConcentracion(cantidad) { concentracion += cantidad musicaFondo.actualizarSegunVidas(concentracion)}
+  method recibirDanio() {  self.cambiarConcentracion(concentracion - self.danioPorDistraccion()) }
+  method recuperarConcentracion() { self.cambiarConcentracion(concentracion + 1) }
+  method cambiarConcentracion(nueva) {
+    concentracion = nueva.max(0)
+    musicaFondo.actualizarSegunVidas(concentracion)
+  }
   method recogerLetra(letra, respuesta) { respuesta.agregarLetra(letra) }
 
   // Apuntes puede proteger a cualquier personaje, independientemente de su habilidad.
   method activarEscudo() { proteccion = new Escudo() }
-  method desactivarEscudo() { proteccion = vulnerable }
   method tieneEscudo() = proteccion.activa()
-  method avanzarTiempo(ms) { proteccion.avanzar(ms, self) }
+  method avanzarTiempo(ms) { proteccion = proteccion.avanzar(ms) }
 }
 
-class Promedio inherits Personajes(velocidadObstaculos = 2.5) {
+class Promedio inherits Personajes {
   override method nombre() = "Promedio"
+  override method velocidadObstaculos() = 2.5
   override method danioPorDistraccion() = 1
   override method usarHabilidad() {}
-  method estadoHabilidad() = "Ninguna"
+  override method estadoHabilidad() = "Ninguna"
 }
 
-class Violento inherits Personajes(velocidadObstaculos = 3.33) {
+class Violento inherits Personajes {
   var habilidadUsada = false
   var eleccion = eleccionNormal
 
   override method nombre() = "Violento"
+  override method velocidadObstaculos() = 3.33
   override method danioPorDistraccion() = 2
   override method usarHabilidad() {
     [self].filter({ p => !p.habilidadUsada() }).forEach({ p =>
@@ -58,14 +63,15 @@ class Violento inherits Personajes(velocidadObstaculos = 3.33) {
   method tieneSuerte() = eleccion.activa()
   method consumirSuerte() { eleccion = eleccionNormal }
   method letraElegida(letra, respuesta) = eleccion.elegir(letra, respuesta, self)
-  method estadoHabilidad() = "Suerte | " +
+  override method estadoHabilidad() = "Suerte | " +
     [estadoEscudo, estadoSuerte, estadoUsada, estadoDisponible].find({ e => e.corresponde(self) }).texto()
 }
 
-class Brillante inherits Personajes(velocidadObstaculos = 1.67) {
+class Brillante inherits Personajes {
   var habilidadUsada = false
 
   override method nombre() = "Brillante"
+  override method velocidadObstaculos() = 1.67
   override method danioPorDistraccion() = 1
   override method usarHabilidad() {
     [self].filter({ p => !p.habilidadUsada() }).forEach({ p =>
@@ -74,22 +80,22 @@ class Brillante inherits Personajes(velocidadObstaculos = 1.67) {
     })
   }
   method habilidadUsada() = habilidadUsada
-  method estadoHabilidad() = "Enfoque | " +
+  override method estadoHabilidad() = "Enfoque | " +
     [estadoEscudo, estadoUsada, estadoDisponible].find({ e => e.corresponde(self) }).texto()
 }
 
 object vulnerable {
   method activa() = false
   method recibirGolpe(personaje) { personaje.recibirDanio() }
-  method avanzar(ms, personaje) {}
+  method avanzar(ms) = self
 }
 class Escudo {
   var restante = 5000
   method activa() = true
   method recibirGolpe(personaje) {}
-  method avanzar(ms, personaje) {
+  method avanzar(ms) {
     restante -= ms
-    [personaje].filter({ p => restante <= 0 }).forEach({ p => p.desactivarEscudo() })
+    return if ( restante <= 0) vulnerable else self
   }
 }
 object eleccionNormal {

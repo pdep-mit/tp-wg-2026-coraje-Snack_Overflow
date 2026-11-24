@@ -215,6 +215,6 @@ test "El menu conserva sus textos y permite jugar con el motor ya iniciado" {
   menuPrincipal.iniciarPartida()
   assert.that(game.hasVisual(gameConfig.jugador()))
   assert.equals("partida", menuPrincipal.nombrePantalla())
-  assert.equals(11, game.width())
+  assert.equals(12, game.width())
   assert.equals(16, game.height())
 }

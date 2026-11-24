@@ -29,7 +29,7 @@ object gameConfig {
   method jugador() = sesion.jugador()
   method dificultad() = dificultad.nombre()
   method sesion() = sesion
-  method velocidadObstaculos() = self.jugador().velocidadObstaculos() * dificultad.factor()
+  method velocidadObstaculos() = self.jugador().velocidadObstaculos() / dificultad.factor()
   method intervaloGeneracion() = dificultad.intervaloGeneracion()
   method intervaloGeneracionAyuda() = dificultad.intervaloGeneracionAyuda()
   method elegirPersonaje(personaje, unaDificultad) {
@@ -242,10 +242,8 @@ class SesionDeJuego {
 
 // Los modos deciden qué mensajes atender: no se pregunta el tipo del objeto chocado.
 class ModoDeJuego {
-  method nombre() = "detenido"
+  method nombre() 
   method indicacion(sesion) = self.nombre()
-  method corresponde(sesion, tiempo) = true
-  method iniciar(sesion) {}
   method avanzar(sesion) {}
   method mover(sesion, accion) {}
   method confirmar(sesion) {}
@@ -276,7 +274,7 @@ class ModoRecorrido inherits ModoCarriles {
   override method indicacion(sesion) =
   "Teclas:Flechas=moverse | Enter=pausar | F=Habilidad"
 
-  override method iniciar(sesion) {
+  method iniciar(sesion) {
     sesion.retirarOpciones()
     sesion.cambiarModo(self)
   }
@@ -293,8 +291,8 @@ class ModoZonaSegura inherits ModoCarriles {
   override method indicacion(sesion) =
   "Flechas: elegir letra | Enter: escribir"
 
-  override method corresponde(sesion, tiempo) = tiempo >= sesion.tiempoDeRecorrido() && sesion.puedeOfrecerLetras()
-  override method iniciar(sesion) {
+  method corresponde(sesion, tiempo) = tiempo >= sesion.tiempoDeRecorrido() && sesion.puedeOfrecerLetras()
+  method iniciar(sesion) {
     sesion.cambiarModo(self)
     sesion.mostrarZonaSegura()
   }
@@ -307,17 +305,20 @@ class ModoZonaSegura inherits ModoCarriles {
   }
 }
 
-class FinDeZona inherits ModoDeJuego {
-  override method corresponde(sesion, tiempo) = tiempo >= sesion.tiempoDeZona()
-  override method iniciar(sesion) { new ModoRecorrido().iniciar(sesion) }
+class FinDeZona {
+  method corresponde(sesion, tiempo) = tiempo >= sesion.tiempoDeZona()
+   method iniciar(sesion) { new ModoRecorrido().iniciar(sesion) }
 }
 
-object continuarModo inherits ModoDeJuego {}
+object continuarModo {
+  method corresponde(sesion, tiempo) = true
+  method iniciar(sesion) {}
+}
 
 class ModoEscritura inherits ModoDeJuego {
-  override method nombre() = "EN PAUSA"
+  override method nombre() = "respondiendo"
   override method textColor() = "00FF00FF"
-  //override method indicacion(sesion) = "Texto: " + sesion.borrador() + " | Enter: enviar | Esc: volver"
+  override method indicacion(sesion) = "Texto: " + sesion.borrador() + " | Enter: enviar | Esc: volver"
 
   override method escribir(sesion, letra) { sesion.agregarAlBorrador(letra) }
   override method borrar(sesion) { sesion.borrarDelBorrador() }
@@ -332,8 +333,8 @@ class ModoResuelto inherits ModoDeJuego {
   override method escribir(sesion, letra) {
     [menuPrincipal].filter({ menu => letra == "M" }).forEach({ menu => menu.mostrar() })
   }
-  override method corresponde(sesion, tiempo) = sesion.resuelta()
-  override method iniciar(sesion) {
+  method corresponde(sesion, tiempo) = sesion.resuelta()
+  method iniciar(sesion) {
     sesion.retirarOpciones()
     sesion.cambiarModo(self)
   }

@@ -33,10 +33,10 @@ object menuPrincipal {
   method dificultadElegida() = dificultades.get(indiceDificultad).nombre()
   method confirmar() { pantalla.confirmar() }
   method cancelar() { pantalla.cancelar() }
-  method izquierda() { pantalla.izquierda() }
-  method derecha() { pantalla.derecha() }
-  method arriba() { pantalla.arriba() }
-  method abajo() { pantalla.abajo() }
+  method izquierda() { pantalla.flechas().izquierda() }
+  method derecha() { pantalla.flechas().derecha() }
+  method arriba() { pantalla.flechas().arriba() }
+  method abajo() { pantalla.flechas().abajo() }
   method borrar() { pantalla.borrar() }
   method letra(letra) { pantalla.letra(letra) }
   method avanzar() { pantalla.avanzar() }
@@ -138,6 +138,7 @@ class LineaMenu {
 
 class Pantalla {
   method nombre()
+  method flechas() = sinFlechas
   method confirmar() {}
   method cancelar() {}
   method borrar() {}
@@ -145,37 +146,38 @@ class Pantalla {
   method avanzar() {}
   method colisionar(elemento) {}
 }
-/* * Se tiene que hacer la clase de PantallaConFlechas ya que 
-    * El gameConfig siempre va a mandar los comandos de movimiento aca
-    :) */
 
-class PantallaConFlechas inherits Pantalla {
+object sinFlechas {
   method izquierda() {}
   method derecha() {}
   method arriba() {}
   method abajo() {}
 }
 
-class PantallaMenu inherits PantallaConFlechas {
+class PantallaMenu inherits Pantalla {
   override method nombre() = "menu"
-  override method izquierda() { menuPrincipal.cambiarPersonaje(-1) }
-  override method derecha() { menuPrincipal.cambiarPersonaje(1) }
-  override method arriba() { menuPrincipal.cambiarDificultad(-1) }
-  override method abajo() { menuPrincipal.cambiarDificultad(1) }
+  override method flechas() = self
+  method izquierda() { menuPrincipal.cambiarPersonaje(-1) }
+  method derecha() { menuPrincipal.cambiarPersonaje(1) }
+  method arriba() { menuPrincipal.cambiarDificultad(-1) }
+  method abajo() { menuPrincipal.cambiarDificultad(1) }
   override method confirmar() { menuPrincipal.iniciarPartida() }
   override method letra(letra) {
     [menuPrincipal].filter({ menu => letra == "H" }).forEach({ menu => menu.mostrarAyuda() })
   }
 }
-class PantallaAyuda inherits PantallaConFlechas {
+class PantallaAyuda inherits Pantalla {
   override method nombre() = "ayuda"
   override method confirmar() { menuPrincipal.mostrar() }
   override method cancelar() { menuPrincipal.mostrar() }
 }
-class PantallaPartida inherits PantallaConFlechas {
+class PantallaPartida inherits Pantalla {
   override method nombre() = "partida"
-  override method izquierda() { gameConfig.moverIzquierda() }
-  override method derecha() { gameConfig.moverDerecha() }
+  override method flechas() = self
+  method izquierda() { gameConfig.moverIzquierda() }
+  method derecha() { gameConfig.moverDerecha() }
+  method arriba() {}
+  method abajo() {}
   override method confirmar() { gameConfig.presionarEnter() }
   override method cancelar() { gameConfig.cancelar() }
   override method borrar() { gameConfig.borrar() }

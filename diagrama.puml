@@ -1,0 +1,196 @@
+@startuml
+
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam nodesep 15
+skinparam ranksep 25
+hide empty members
+
+' <<object>> = object de Wollok | <<rol>> = mensajes que entienden varios
+' objetos y se usan indistintamente (polimorfismo, duck typing)
+
+' ---------- Configuración y sesión ----------
+class gameConfig <<object>> {
+    + jugador()
+    + elegirPersonaje(personaje, dificultad)
+}
+class SesionDeJuego {
+    + avanzar()
+    + usarHabilidad()
+    + colisionarCon(elemento)
+}
+class Dificultad {
+    + factor()
+}
+gameConfig --> SesionDeJuego
+gameConfig --> Dificultad
+Dificultad <|-- facil
+Dificultad <|-- normal
+Dificultad <|-- dificil
+
+' ---------- Modos de juego ----------
+abstract class ModoDeJuego {
+    + {abstract} nombre()
+    + avanzar(sesion)
+    + confirmar(sesion)
+    + colisionarCon(sesion, elemento, jugador)
+}
+interface Transicion <<rol>> {
+    + corresponde(sesion, tiempo)
+    + iniciar(sesion)
+}
+class FinDeZona {
+    + corresponde(): terminó la zona segura
+    + iniciar(): vuelve al recorrido
+}
+class continuarModo <<object>> {
+    + corresponde(): siempre
+    + iniciar(): no cambia nada
+}
+abstract class ModoCarriles
+class ModoRecorrido {
+    + avanzar(): genera obstáculos
+}
+class ModoZonaSegura {
+    + recogerLetra(): aceptarEleccion()
+}
+class ModoEscritura {
+    + escribir(): agrega al borrador
+}
+class ModoResuelto
+class ModoSinVidas {
+    + iniciar(): Game Over
+}
+SesionDeJuego --> ModoDeJuego : modo actual
+ModoDeJuego <|-- ModoCarriles
+ModoDeJuego <|-- ModoEscritura
+ModoDeJuego <|-- ModoResuelto
+ModoCarriles <|-- ModoRecorrido
+ModoCarriles <|-- ModoZonaSegura
+ModoResuelto <|-- ModoSinVidas
+Transicion <|.. ModoZonaSegura
+Transicion <|.. ModoResuelto
+Transicion <|.. FinDeZona
+Transicion <|.. continuarModo
+
+' ---------- Personajes ----------
+abstract class Personajes {
+    + {abstract} danioPorDistraccion()
+    + {abstract} velocidadObstaculos()
+    + {abstract} usarHabilidad()
+    + {abstract} estadoHabilidad()
+    + recogerLetra(letra, respuesta)
+}
+class Promedio {
+    + usarHabilidad(): sin efecto
+}
+class Violento {
+    + usarHabilidad(): activa Suerte
+    + recogerLetra(): aplica Suerte
+}
+class Brillante {
+    + usarHabilidad(): activa Enfoque
+}
+SesionDeJuego --> Personajes : jugador elegido
+Personajes <|-- Promedio
+Personajes <|-- Violento
+Personajes <|-- Brillante
+
+' ---------- Roles polimórficos ----------
+interface Proteccion <<rol>> {
+    + recibirGolpe(personaje)
+}
+class vulnerable <<object>> {
+    + recibirGolpe(): pierde vida
+}
+class Escudo {
+    + recibirGolpe(): no pasa nada
+}
+Personajes --> Proteccion : proteccion por ayudas
+Proteccion <|.. vulnerable
+Proteccion <|.. Escudo
+
+interface Eleccion <<rol>> {
+    + elegir(letra, respuesta, personaje)
+}
+class eleccionNormal <<object>> {
+    + elegir(): letra recogida
+}
+class eleccionConSuerte <<object>> {
+    + elegir(): letra correcta
+}
+Violento --> Eleccion : eleccion
+Eleccion <|.. eleccionNormal
+Eleccion <|.. eleccionConSuerte
+
+' ---------- Objetos de la pista ----------
+interface Colisionable <<rol>> {
+    + serChocadoPor(personaje)
+}
+abstract class ObjetoJuego {
+    + avanzar(ms, velocidad)
+    + {abstract} serChocadoPor(personaje)
+}
+class Obstaculo {
+    + serChocadoPor(): perderConcentracion()
+}
+abstract class Ayuda {
+    + serChocadoPor(): aplicarEfecto() y se saca
+    + {abstract} aplicarEfecto(personaje)
+}
+class Cafe {
+    + aplicarEfecto(): recuperarConcentracion()
+}
+class Apuntes {
+    + aplicarEfecto(): activarEscudo()
+}
+class AyudaClaude {
+    + aplicarEfecto(): completarLetraComodin()
+}
+class LetraFisica {
+    + serChocadoPor(): recogerLetra()
+}
+ModoCarriles ..> Colisionable
+Colisionable <|.. ObjetoJuego
+Colisionable <|.. LetraFisica
+ObjetoJuego <|-- Obstaculo
+ObjetoJuego <|-- Ayuda
+Ayuda <|-- Cafe
+Ayuda <|-- Apuntes
+Ayuda <|-- AyudaClaude
+
+' ---------- Menú y pantallas ----------
+class menuPrincipal <<object>> {
+    + mostrar()
+    + iniciarPartida()
+}
+abstract class Pantalla {
+    + {abstract} nombre()
+    + flechas()
+    + confirmar()
+    + letra(letra)
+    + colisionar(elemento)
+}
+class sinFlechas <<object>> {
+    + izquierda() / derecha() / arriba() / abajo(): no hacen nada
+}
+class PantallaMenu {
+    + flechas(): ella misma
+    + izquierda(): cambia personaje
+    + arriba(): cambia dificultad
+}
+class PantallaAyuda {
+    + confirmar(): vuelve al menú
+}
+class PantallaPartida {
+    + flechas(): ella misma
+    + izquierda(): moverIzquierda()
+    + colisionar(): colisionarCon()
+}
+menuPrincipal --> Pantalla : pantalla activa
+Pantalla <|-- PantallaMenu
+Pantalla <|-- PantallaAyuda
+Pantalla <|-- PantallaPartida
+Pantalla ..> sinFlechas : flechas() por defecto
+
+@enduml

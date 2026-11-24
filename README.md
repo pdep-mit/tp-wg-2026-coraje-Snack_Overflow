@@ -40,8 +40,15 @@ Las letras y respuestas incorrectas no descuentan vidas ni puntos.
 Cada habilidad puede usarse **una sola vez por partida**, sin cooldown. El tiempo
 del escudo se pausa al escribir. Todos comienzan con 5 corazones.
 
-Fácil aplica un factor de 0.75 a la velocidad y frecuencia de distracciones;
-Normal usa 1 y Difícil 1.25. La dificultad no cambia daño, puntaje ni habilidades.
+La dificultad cambia la velocidad de caída y cada cuánto aparecen distracciones y ayudas:
+
+| Dificultad | Velocidad de caída | Tiempo entre apariciones |
+| --- | --- | --- |
+| Fácil | se divide por 1.5 (más lenta) | se multiplica por 1.5 (más espaciadas) |
+| Normal | sin cambios | sin cambios |
+| Difícil | se divide por 0.75 (más rápida) | se multiplica por 0.75 (más seguidas) |
+
+La dificultad no cambia daño, puntaje ni habilidades.
 
 ## Controles
 
